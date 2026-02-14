@@ -6,18 +6,19 @@
 // Created by Vasya on 07.02.2026.
 //
 #include <stdio.h>
-#include <windows.h>
+#include <stdlib.h>
+#include <string.h>
 FieldInfo *DOUBLE_FIELD_INFO = NULL;
 FieldInfo *STRING_FIELD_INFO = NULL;
 
-boolean compareDouble(const void * a, const void * b) {
+int compareDouble(const void * a, const void * b) {
     if (a == NULL || b == NULL) return FALSE;
     double * double_a = (double *) a;
     double * double_b = (double *) b;
     if (*double_a < *double_b) return FALSE;
     return TRUE;
 }
-boolean compareString(const void * a, const void * b) {
+int compareString(const void * a, const void * b) {
     if (a == NULL || b == NULL) return FALSE;
     char *string_a = (char *) a;
     char *string_b = (char *) b;

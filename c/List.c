@@ -33,16 +33,14 @@ void add(List *list,const void *ell) {
     set(list, list->size++, ell);
 }
 
+/*
 void printList(const List *list) {
     if (list->size == 0 || list == NULL) return;
     for (int i = 0; i < list->size; i++) {
         printf("%s\n", list->field_info->toString(get(list, i)));
     }
 }
-void swap(void * a, void * b) {
-    void ** t = &a;
-    a = b;
-}
+*/
 
 void sort(List *list) {
     if (list->size == 0 || list == NULL) return;
@@ -55,10 +53,9 @@ void sort(List *list) {
                 minIndex = j;
             }
         }
-        temp = get(list, i);
         set(list, i, get(list, minIndex));
         set(list, minIndex, temp);
-        printList(list);
+        //printList(list);
         printf("\n");
     }
 }
@@ -77,7 +74,7 @@ void map(List * list, void *(*function)(void *)) {
     }
 }
 
-void where(List *list, boolean (*function)(void *)) {
+void where(List *list, int (*function)(void *)) {
     for (int i = 0; i < list->size; ++i) {
         if (!function(get(list, i))) {
             for (int j = i; j < list->size - 1; ++j) {
@@ -97,7 +94,7 @@ List * concat(const List *list1, const List *list2) {
         add(list, get(list1, i));
     }
     for (int i = 0; i < list2->size; ++i) {
-        add(list, get(list2, list1->size + i));
+        add(list, get(list2, i));
     }
     return list;
 }

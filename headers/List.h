@@ -5,7 +5,8 @@
 #ifndef FIRSTLAB_LIST_H
 #define FIRSTLAB_LIST_H
 #include <stdio.h>
-#include <windows.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "FieldInfo.h"
 #define CAPACITY 10
@@ -22,7 +23,7 @@ void add(List * list,const void * ell);
 void * get(const List * list, int index);
 void set(List * list, int index, const void * ell);
 void map(List *list, void * (*function)(void *));
-void where(List *list, boolean (*function)(void *));
+void where(List *list, int (*function)(void *));
 List * concat(const List *list1, const List *list2);
 void sort(List *list);
 

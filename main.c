@@ -5,7 +5,7 @@
 #include <math.h>
 //26 вариант
 // void * forDoubleMap(void *);
-// boolean forWhere(void *);
+// int forWhere(void *);
 // void * forStringMap(void *);
 int main(void) {
     // List * list = createEmptyList(getStringFieldInfo());
@@ -37,7 +37,7 @@ int main(void) {
 // boolean forWhere(void * x) {
 //     double * t = (double *)x;
 //     if (*t > 26) {
-//         return TRUE;
+//         return 1;
 //     }
-//     return FALSE;
+//     return 0;
 // }
