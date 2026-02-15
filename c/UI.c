@@ -26,6 +26,50 @@ void clearList() {
     }
 }
 
+// Вспомогательные функции для проверки map и where
+
+// Проверочная функция для where для double (фильтр: положительные числа)
+int positiveFilterFunction(const void* element) {
+    double value = *(double*)element;
+    return value > 0;
+}
+
+// Проверочная функция для map для double (преобразование: удвоение значения)
+void* doubleValueFunction(const void* element) {
+    double* original_value = (double*)element;
+    double* new_value = malloc(sizeof(double));
+    if(new_value != NULL) {
+        *new_value = (*original_value) * 2;
+    }
+    return new_value;
+}
+
+// Проверочная функция для where для строк (фильтр: длина строки > 3)
+int stringLengthFilterFunction(const void* element) {
+    char* str = (char*)element;
+    return str != NULL && strlen(str) > 3;
+}
+
+// Проверочная функция для map для строк (преобразование: в верхний регистр)
+void* toUppercaseFunction(const void* element) {
+    char* original_str = (char*)element;
+    if(original_str == NULL) return NULL;
+    
+    int len = strlen(original_str);
+    char* upper_str = malloc((len + 1) * sizeof(char));
+    if(upper_str != NULL) {
+        for(int i = 0; i <= len; i++) {
+            if(original_str[i] >= 'a' && original_str[i] <= 'z') {
+                upper_str[i] = original_str[i] - 'a' + 'A';
+            } else {
+                upper_str[i] = original_str[i];
+            }
+        }
+        upper_str[len] = '\0';
+    }
+    return upper_str;
+}
+
 // Консольный интерфейс для работы с double
 void doubleUI() {
     if (field_info_double == NULL) {
@@ -41,13 +85,12 @@ void doubleUI() {
         printf("1. Create list\n");
         printf("2. Add element\n");
         printf("3. Get element\n");
-        printf("4. Delete list\n");
-        printf("5. Sort list\n");
-        printf("6. Concatenate list with itself\n");
-        printf("7. Apply where\n");
-        printf("8. Apply map\n");
-        printf("9. Print all elements\n");
-        printf("10. Delete list and all elements\n");
+        printf("4. Sort list\n");
+        printf("5. Concatenate list with itself\n");
+        printf("6. Apply where\n");
+        printf("7. Apply map\n");
+        printf("8. Print all elements\n");
+        printf("9. Delete list and all elements\n");
         printf("0. Exit\n");
         printf("Enter your choice: ");
         
@@ -207,13 +250,12 @@ void stringUI() {
         printf("1. Create list\n");
         printf("2. Add element\n");
         printf("3. Get element\n");
-        printf("4. Delete list\n");
-        printf("5. Sort list\n");
-        printf("6. Concatenate list with itself\n");
-        printf("7. Apply where\n");
-        printf("8. Apply map\n");
-        printf("9. Print all elements\n");
-        printf("10. Delete list and all elements\n");
+        printf("4. Sort list\n");
+        printf("5. Concatenate list with itself\n");
+        printf("6. Apply where\n");
+        printf("7. Apply map\n");
+        printf("8. Print all elements\n");
+        printf("9. Delete list and all elements\n");
         printf("0. Exit\n");
         printf("Enter your choice: ");
         
