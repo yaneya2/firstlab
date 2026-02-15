@@ -34,12 +34,6 @@ void add(List *list,const void *ell) {
     }
     set(list, list->size++, ell);
 }
-// void printList(const List *list) {
-//     if (list->size == 0 || list == NULL) return;
-//     for (int i = 0; i < list->size; i++) {
-//         printf("%s\n", list->field_info->toString(get(list, i)));
-//     }
-// }
 void sort(List *list) {
     if (list->size == 0 || list == NULL) return;
     int minIndex = 0;
@@ -59,7 +53,7 @@ void sort(List *list) {
 List * createList(int capacity, const FieldInfo *field_info) {
     List * list = (List*)malloc(sizeof(List));
     list->capacity = capacity;
-    list->size = PTR_SIZE;
+    list->size = 0;
     list->field_info = field_info;
     list->data = malloc(list->capacity * PTR_SIZE);
     return list;
@@ -69,12 +63,14 @@ void map(List * list, void *(*function)(void *)) {
         set(list, i,function(get(list, i)));
     }
 }
-void where(List *list, boolean (*function)(void *)) {
+void where(List *list, boolean (*function)(const void *)) {
     for (int i = 0; i < list->size; ++i) {
         if (!function(get(list, i))) {
+            list->field_info->deallocate(get(list, list->size));
             for (int j = i; j < list->size - 1; ++j) {
                 set(list, j, get(list, j + 1));
             }
+            list->field_info->deallocate(get(list, list->size));
             list->size--;
             i--;
         }
@@ -88,7 +84,7 @@ List * concat(const List *list1, const List *list2) {
         add(list, get(list1, i));
     }
     for (int i = 0; i < list2->size; ++i) {
-        add(list, get(list2, list1->size + i));
+        add(list, get(list2, i));
     }
     return list;
 }

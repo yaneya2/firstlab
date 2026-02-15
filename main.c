@@ -1,10 +1,11 @@
 #include <stdio.h>
 
-#include "headers/List.h"
-#include "headers/FieldInfo.h"
+#include "c/UI.c"
+
 #include <math.h>
 //26 вариант
-int main(void) {
 
+int main(void) {
+    stringUI();
 }
 

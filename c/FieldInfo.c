@@ -40,6 +40,12 @@ void * doubleAllocate() {
 void * stringAllocate() {
     return malloc(STRING_SIZE);//возможно тут лучше по другому
 }
+void stringDeallocate(void * ptr) {
+    free(ptr);
+}
+void doubleDeallocate(void * ptr) {
+    free(ptr);
+}
 void doubleAssign(void * res, void * arg) {
     memcpy(res, arg, sizeof(double));
 }
@@ -53,6 +59,7 @@ const FieldInfo * getDoubleFieldInfo() {
         DOUBLE_FIELD_INFO->name = "double";
         DOUBLE_FIELD_INFO->compare = doubleCompare;
         DOUBLE_FIELD_INFO->allocate = doubleAllocate;
+        DOUBLE_FIELD_INFO->deallocate = doubleDeallocate;
         DOUBLE_FIELD_INFO->assign = doubleAssign;
         //DOUBLE_FIELD_INFO->toString = doubleToString;
     }
@@ -65,6 +72,7 @@ const FieldInfo * getStringFieldInfo() {
         STRING_FIELD_INFO->name = "string";
         STRING_FIELD_INFO->compare = stringCompare;
         STRING_FIELD_INFO->allocate = stringAllocate;
+        STRING_FIELD_INFO->deallocate = stringDeallocate;
         STRING_FIELD_INFO->assign = stringAssign;
         //STRING_FIELD_INFO->toString = charToString;
     }

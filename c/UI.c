@@ -5,8 +5,6 @@
 
 // Внешние переменные для хранения текущего списка и типа данных
 static List* current_list = NULL;
-static const FieldInfo* field_info_double = NULL;
-static const FieldInfo* field_info_string = NULL;
 
 // Функция для инициализации типов данных (предполагается, что они определены где-то в других файлах)
 extern const FieldInfo* getDoubleFieldInfo();
@@ -17,7 +15,7 @@ void clearList() {
     if (current_list != NULL) {
         // Освобождаем каждый элемент списка
         for (int i = 0; i < current_list->size; i++) {
-            current_list->field_info->deallocate(current_list->data[i]);
+            current_list->field_info->deallocate(get(current_list, i));
         }
         // Освобождаем сам список
         free(current_list->data);
@@ -29,29 +27,26 @@ void clearList() {
 // Вспомогательные функции для проверки map и where
 
 // Проверочная функция для where для double (фильтр: положительные числа)
-int positiveFilterFunction(const void* element) {
+boolean positiveFilterFunction(const void* element) {
     double value = *(double*)element;
     return value > 0;
 }
 
 // Проверочная функция для map для double (преобразование: удвоение значения)
-void* doubleValueFunction(const void* element) {
+void* doubleValueFunction(void* element) {
     double* original_value = (double*)element;
-    double* new_value = malloc(sizeof(double));
-    if(new_value != NULL) {
-        *new_value = (*original_value) * 2;
-    }
-    return new_value;
+    *original_value *=2;
+    return original_value;
 }
 
 // Проверочная функция для where для строк (фильтр: длина строки > 3)
-int stringLengthFilterFunction(const void* element) {
+boolean stringLengthFilterFunction(const void* element) {
     char* str = (char*)element;
     return str != NULL && strlen(str) > 3;
 }
 
 // Проверочная функция для map для строк (преобразование: в верхний регистр)
-void* toUppercaseFunction(const void* element) {
+void* toUppercaseFunction(void* element) {
     char* original_str = (char*)element;
     if(original_str == NULL) return NULL;
     
@@ -67,15 +62,13 @@ void* toUppercaseFunction(const void* element) {
         }
         upper_str[len] = '\0';
     }
+    current_list->field_info->deallocate(original_str);
+    // заменяем строку , если работать со старой, то можно вернуть ее же
     return upper_str;
 }
 
 // Консольный интерфейс для работы с double
 void doubleUI() {
-    if (field_info_double == NULL) {
-        field_info_double = getDoubleFieldInfo();
-    }
-
     int choice;
     double value;
     int index;
@@ -102,7 +95,7 @@ void doubleUI() {
                     printf("Warning: Current list will be deleted. ");
                     clearList();
                 }
-                current_list = createEmptyList(field_info_double);
+                current_list = createEmptyList(getDoubleFieldInfo());
                 printf("Double list created successfully.\n");
                 break;
                 
@@ -177,7 +170,7 @@ void doubleUI() {
                 // Предполагаем, что есть функция для фильтрации, например, больше 0
                 printf("Applying where filter (positive numbers only)\n");
                 // Для демонстрации, предположим, что у нас есть функция фильтрации
-                // where(current_list, positiveFilterFunction);
+                where(current_list, positiveFilterFunction);
                 printf("Note: Filter function needs to be implemented separately.\n");
                 break;
                 
@@ -189,7 +182,7 @@ void doubleUI() {
                 // Предполагаем, что есть функция для отображения, например, удвоение
                 printf("Applying map (doubling values)\n");
                 // Для демонстрации, предположим, что у нас есть функция отображения
-                // map(current_list, doubleValueFunction);
+                map(current_list, doubleValueFunction);
                 printf("Note: Map function needs to be implemented separately.\n");
                 break;
                 
@@ -214,6 +207,9 @@ void doubleUI() {
                 break;
                 
             case 0: // Выход
+                if (current_list != NULL) {
+                    clearList();
+                }
                 printf("Exiting double UI...\n");
                 return;
                 
@@ -226,9 +222,6 @@ void doubleUI() {
 
 // Консольный интерфейс для работы со строками
 void stringUI() {
-    if (field_info_string == NULL) {
-        field_info_string = getStringFieldInfo();
-    }
 
     int choice;
     char buffer[256];
@@ -257,7 +250,7 @@ void stringUI() {
                     printf("Warning: Current list will be deleted. ");
                     clearList();
                 }
-                current_list = createEmptyList(field_info_string);
+                current_list = createEmptyList(getStringFieldInfo());
                 printf("String list created successfully.\n");
                 break;
                 
@@ -333,7 +326,7 @@ void stringUI() {
                 }
                 printf("Applying where filter (strings longer than 3 chars)\n");
                 // Для демонстрации, предположим, что у нас есть функция фильтрации
-                // where(current_list, stringLengthFilterFunction);
+                where(current_list, stringLengthFilterFunction);
                 printf("Note: Filter function needs to be implemented separately.\n");
                 break;
                 
@@ -344,7 +337,7 @@ void stringUI() {
                 }
                 printf("Applying map (converting to uppercase)\n");
                 // Для демонстрации, предположим, что у нас есть функция отображения
-                // map(current_list, toUppercaseFunction);
+                map(current_list, toUppercaseFunction);
                 printf("Note: Map function needs to be implemented separately.\n");
                 break;
                 
@@ -353,14 +346,14 @@ void stringUI() {
                     printf("Error: No list created.\n");
                     break;
                 }
-                printf("List elements: ");
+                printf("List elements: [");
                 for (int i = 0; i < current_list->size; i++) {
                     char* element = (char*)get(current_list, i);
                     if (element != NULL) {
-                        printf("\"%s\" ", element);
+                        printf("\"%s\"", element);
                     }
                 }
-                printf("\n");
+                printf("]\n");
                 break;
                 
             case 9: // Удаление листа и всех его элементов

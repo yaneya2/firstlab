@@ -16,6 +16,7 @@ typedef struct {
     char *name;
     UnaryOperator assign;
     Allocator allocate;
+    Deallocator deallocate;
     BooleanOperator compare;
     //StringOperator toString;
 } FieldInfo;
