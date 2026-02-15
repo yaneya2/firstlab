@@ -14,10 +14,10 @@ typedef char * (*StringOperator)(const void *);
 typedef struct {
     int size;
     char *name;
-    //UnaryOperator assign;
-    //Allocator allocate;
+    UnaryOperator assign;
+    Allocator allocate;
     BooleanOperator compare;
-    StringOperator toString;
+    //StringOperator toString;
 } FieldInfo;
 const FieldInfo *getDoubleFieldInfo();
 const FieldInfo *getStringFieldInfo();

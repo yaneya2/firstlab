@@ -13,11 +13,12 @@ typedef struct {
     int capacity;
     int size;
     FieldInfo *field_info;
-    void * data;
+    //void * data;
+    void ** data;
 }List;
 List * createList(int capacity, const FieldInfo *field_info);
 List * createEmptyList(const FieldInfo *field_info);
-void printList(const List *list);
+//void printList(const List *list);
 void add(List * list,const void * ell);
 void * get(const List * list, int index);
 void set(List * list, int index, const void * ell);

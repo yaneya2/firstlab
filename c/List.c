@@ -2,6 +2,7 @@
 // Created by Vasya on 07.02.2026.
 //
 #include "../headers/List.h"
+
 List * createEmptyList(const FieldInfo *field_info) {
     if (field_info == NULL) return NULL;
     List * list = (List*)malloc(sizeof(List));
@@ -11,19 +12,20 @@ List * createEmptyList(const FieldInfo *field_info) {
     list->data = malloc(list->capacity * PTR_SIZE);
     return list;
 }
-
 void * get(const List *list, int index) {
     if (list == NULL || index < 0 || index >= list->size) return NULL;
-    void ** t = (void **)list->data;
-    return t[index];
+    // void ** t = (void **)list->data;
+    // return t[index];
+    return list->data[index];
 }
-
 void set(List *list, int index, const void *ell) {
     if (list == NULL || index < 0 || index >= list->size) return;
-    void ** t = (void **)list->data;
-    t[index] = ell;
+    // void ** t = (void **)list->data;
+    // t[index] = list->field_info->allocate();
+    // list->field_info->assign(t[index], ell);
+    list->data[index] = list->field_info->allocate();
+    list->field_info->assign(list->data[index], ell);
 }
-
 void add(List *list,const void *ell) {
     if (list == NULL || ell == NULL) return;
     if (list->size == list->capacity) {
@@ -32,22 +34,16 @@ void add(List *list,const void *ell) {
     }
     set(list, list->size++, ell);
 }
-
-void printList(const List *list) {
-    if (list->size == 0 || list == NULL) return;
-    for (int i = 0; i < list->size; i++) {
-        printf("%s\n", list->field_info->toString(get(list, i)));
-    }
-}
-void swap(void * a, void * b) {
-    void ** t = &a;
-    a = b;
-}
-
+// void printList(const List *list) {
+//     if (list->size == 0 || list == NULL) return;
+//     for (int i = 0; i < list->size; i++) {
+//         printf("%s\n", list->field_info->toString(get(list, i)));
+//     }
+// }
 void sort(List *list) {
     if (list->size == 0 || list == NULL) return;
     int minIndex = 0;
-    void * temp = 0;
+    void * t = 0;
     for (int i = 0; i < list->size - 1; i++) {
         minIndex = i;
         for (int j = i + 1; j < list->size; j++) {
@@ -55,14 +51,11 @@ void sort(List *list) {
                 minIndex = j;
             }
         }
-        temp = get(list, i);
+        t = get(list, i);
         set(list, i, get(list, minIndex));
-        set(list, minIndex, temp);
-        printList(list);
-        printf("\n");
+        set(list, minIndex, t);
     }
 }
-
 List * createList(int capacity, const FieldInfo *field_info) {
     List * list = (List*)malloc(sizeof(List));
     list->capacity = capacity;
@@ -76,7 +69,6 @@ void map(List * list, void *(*function)(void *)) {
         set(list, i,function(get(list, i)));
     }
 }
-
 void where(List *list, boolean (*function)(void *)) {
     for (int i = 0; i < list->size; ++i) {
         if (!function(get(list, i))) {
@@ -88,7 +80,6 @@ void where(List *list, boolean (*function)(void *)) {
         }
     }
 }
-
 List * concat(const List *list1, const List *list2) {
     if (list1 == NULL || list2 == NULL) return NULL;
     if (list1->field_info != list2->field_info) return NULL;
