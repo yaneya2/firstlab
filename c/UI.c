@@ -136,18 +136,7 @@ void doubleUI() {
                 }
                 break;
                 
-            case 4: // Удаление листа (освобождение памяти)
-                if (current_list != NULL) {
-                    free(current_list->data);
-                    free(current_list);
-                    current_list = NULL;
-                    printf("List deleted.\n");
-                } else {
-                    printf("No list to delete.\n");
-                }
-                break;
-                
-            case 5: // Сортировка листа
+            case 4: // Сортировка листа
                 if (current_list == NULL) {
                     printf("Error: No list created.\n");
                     break;
@@ -156,7 +145,7 @@ void doubleUI() {
                 printf("List sorted successfully.\n");
                 break;
                 
-            case 6: // Конкатенация листа с самим собой
+            case 5: // Конкатенация листа с самим собой
                 if (current_list == NULL) {
                     printf("Error: No list created.\n");
                     break;
@@ -180,7 +169,7 @@ void doubleUI() {
                 }
                 break;
                 
-            case 7: // Применение where
+            case 6: // Применение where
                 if (current_list == NULL) {
                     printf("Error: No list created.\n");
                     break;
@@ -192,7 +181,7 @@ void doubleUI() {
                 printf("Note: Filter function needs to be implemented separately.\n");
                 break;
                 
-            case 8: // Применение map
+            case 7: // Применение map
                 if (current_list == NULL) {
                     printf("Error: No list created.\n");
                     break;
@@ -204,7 +193,7 @@ void doubleUI() {
                 printf("Note: Map function needs to be implemented separately.\n");
                 break;
                 
-            case 9: // Вывод всех элементов
+            case 8: // Вывод всех элементов
                 if (current_list == NULL) {
                     printf("Error: No list created.\n");
                     break;
@@ -219,7 +208,7 @@ void doubleUI() {
                 printf("\n");
                 break;
                 
-            case 10: // Удаление листа и всех его элементов
+            case 9: // Удаление листа и всех его элементов
                 clearList();
                 printf("List and all elements deleted.\n");
                 break;
@@ -304,18 +293,7 @@ void stringUI() {
                 }
                 break;
                 
-            case 4: // Удаление листа (освобождение памяти)
-                if (current_list != NULL) {
-                    free(current_list->data);
-                    free(current_list);
-                    current_list = NULL;
-                    printf("List deleted.\n");
-                } else {
-                    printf("No list to delete.\n");
-                }
-                break;
-                
-            case 5: // Сортировка листа
+            case 4: // Сортировка листа
                 if (current_list == NULL) {
                     printf("Error: No list created.\n");
                     break;
@@ -324,7 +302,7 @@ void stringUI() {
                 printf("List sorted successfully.\n");
                 break;
                 
-            case 6: // Конкатенация листа с самим собой
+            case 5: // Конкатенация листа с самим собой
                 if (current_list == NULL) {
                     printf("Error: No list created.\n");
                     break;
@@ -348,7 +326,7 @@ void stringUI() {
                 }
                 break;
                 
-            case 7: // Применение where
+            case 6: // Применение where
                 if (current_list == NULL) {
                     printf("Error: No list created.\n");
                     break;
@@ -359,7 +337,7 @@ void stringUI() {
                 printf("Note: Filter function needs to be implemented separately.\n");
                 break;
                 
-            case 8: // Применение map
+            case 7: // Применение map
                 if (current_list == NULL) {
                     printf("Error: No list created.\n");
                     break;
@@ -370,7 +348,7 @@ void stringUI() {
                 printf("Note: Map function needs to be implemented separately.\n");
                 break;
                 
-            case 9: // Вывод всех элементов
+            case 8: // Вывод всех элементов
                 if (current_list == NULL) {
                     printf("Error: No list created.\n");
                     break;
@@ -385,7 +363,7 @@ void stringUI() {
                 printf("\n");
                 break;
                 
-            case 10: // Удаление листа и всех его элементов
+            case 9: // Удаление листа и всех его элементов
                 clearList();
                 printf("List and all elements deleted.\n");
                 break;
