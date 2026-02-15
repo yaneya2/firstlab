@@ -8,4 +8,5 @@ add_executable(firstlab main.c
         c/List.c
         c/FieldInfo.c
         headers/FieldInfo.h
-        headers/Allocator.h)
+        headers/Allocator.h
+        tests.c)
