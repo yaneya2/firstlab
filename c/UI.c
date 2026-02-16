@@ -4,54 +4,45 @@
 #include "../headers/FieldInfo.h"
 
 // Внешние переменные для хранения текущего списка и типа данных
-static List* current_list = NULL;
+static List *current_list = NULL;
 
 // Функция для инициализации типов данных (предполагается, что они определены где-то в других файлах)
-extern const FieldInfo* getDoubleFieldInfo();
-extern const FieldInfo* getStringFieldInfo();
+extern const FieldInfo * getDoubleFieldInfo();
+extern const FieldInfo * getStringFieldInfo();
 
 // Функция для очистки списка
 void clearList() {
-    if (current_list != NULL) {
-        // Освобождаем каждый элемент списка
-        for (int i = 0; i < current_list->size; i++) {
-            current_list->field_info->deallocate(get(current_list, i));
-        }
-        // Освобождаем сам список
-        free(current_list->data);
-        free(current_list);
-        current_list = NULL;
-    }
+    deleteList(current_list);
 }
 
 // Вспомогательные функции для проверки map и where
 
 // Проверочная функция для where для double (фильтр: положительные числа)
-boolean positiveFilterFunction(const void* element) {
+boolean positiveFilterFunction(const void *element) {
     double value = *(double*)element;
     return value > 0;
 }
 
 // Проверочная функция для map для double (преобразование: удвоение значения)
-void* doubleValueFunction(void* element) {
+void* doubleValueFunction(void *element) {
     double* original_value = (double*)element;
     *original_value *=2;
     return original_value;
 }
 
 // Проверочная функция для where для строк (фильтр: длина строки > 3)
-boolean stringLengthFilterFunction(const void* element) {
-    char* str = (char*)element;
+boolean stringLengthFilterFunction(const void *element) {
+    char *str = (char*)element;
     return str != NULL && strlen(str) > 3;
 }
 
 // Проверочная функция для map для строк (преобразование: в верхний регистр)
-void* toUppercaseFunction(void* element) {
-    char* original_str = (char*)element;
+void* toUppercaseFunction(void *element) {
+    char *original_str = (char*)element;
     if(original_str == NULL) return NULL;
     
     int len = strlen(original_str);
-    char* upper_str = malloc((len + 1) * sizeof(char));
+    char *upper_str = malloc((len + 1) * sizeof(char));
     if(upper_str != NULL) {
         for(int i = 0; i <= len; i++) {
             if(original_str[i] >= 'a' && original_str[i] <= 'z') {
@@ -147,11 +138,7 @@ void doubleUI() {
                     List* temp = concat(current_list, current_list);
                     if (temp != NULL) {
                         // Освобождаем старый список
-                        for (int i = 0; i < current_list->size; i++) {
-                            current_list->field_info->deallocate(current_list->data[i]);
-                        }
-                        free(current_list->data);
-                        free(current_list);
+                        deleteList(current_list);
                         
                         // Присваиваем новый конкатенированный список
                         current_list = temp;
@@ -193,7 +180,7 @@ void doubleUI() {
                 }
                 printf("List elements: ");
                 for (int i = 0; i < current_list->size; i++) {
-                    double* element = (double*)get(current_list, i);
+                    double *element = (double*)get(current_list, i);
                     if (element != NULL) {
                         printf("%.2f ", *element);
                     }
@@ -203,6 +190,7 @@ void doubleUI() {
                 
             case 9: // Удаление листа и всех его элементов
                 clearList();
+                current_list = NULL;
                 printf("List and all elements deleted.\n");
                 break;
                 
@@ -275,7 +263,7 @@ void stringUI() {
                 printf("Enter index to get element: ");
                 scanf("%d", &index);
                 if (index >= 0 && index < current_list->size) {
-                    char* element = (char*)get(current_list, index);
+                    char *element = (char*)get(current_list, index);
                     if (element != NULL) {
                         printf("Element at index %d: %s\n", index, element);
                     } else {
@@ -300,23 +288,12 @@ void stringUI() {
                     printf("Error: No list created.\n");
                     break;
                 }
-                {
-                    List* temp = concat(current_list, current_list);
-                    if (temp != NULL) {
-                        // Освобождаем старый список
-                        for (int i = 0; i < current_list->size; i++) {
-                            current_list->field_info->deallocate(current_list->data[i]);
-                        }
-                        free(current_list->data);
-                        free(current_list);
-                        
-                        // Присваиваем новый конкатенированный список
-                        current_list = temp;
-                        printf("List concatenated with itself successfully.\n");
-                    } else {
-                        printf("Error concatenating lists.\n");
-                    }
-                }
+                List *temp = concat(current_list, current_list);
+                // Освобождаем старый список
+                deleteList(current_list);
+                // Присваиваем новый конкатенированный список
+                current_list = temp;
+                printf("List concatenated with itself successfully.\n");
                 break;
                 
             case 6: // Применение where
@@ -348,7 +325,7 @@ void stringUI() {
                 }
                 printf("List elements: [");
                 for (int i = 0; i < current_list->size; i++) {
-                    char* element = (char*)get(current_list, i);
+                    char *element = (char*)get(current_list, i);
                     if (element != NULL) {
                         printf("\"%s\"", element);
                     }
@@ -358,6 +335,7 @@ void stringUI() {
                 
             case 9: // Удаление листа и всех его элементов
                 clearList();
+                current_list = NULL;
                 printf("List and all elements deleted.\n");
                 break;
                 

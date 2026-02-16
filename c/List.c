@@ -37,7 +37,7 @@ void add(List *list,const void *ell) {
 void sort(List *list) {
     if (list->size == 0 || list == NULL) return;
     int minIndex = 0;
-    void * t = 0;
+    void *t = 0;
     for (int i = 0; i < list->size - 1; i++) {
         minIndex = i;
         for (int j = i + 1; j < list->size; j++) {
@@ -50,6 +50,16 @@ void sort(List *list) {
         set(list, minIndex, t);
     }
 }
+
+void deleteList(List *list) {
+    if (list == NULL) return;
+    for (int i = 0; i < list->size; i++) {
+        list->field_info->deallocate(get(list, i));
+    }
+    free(list->data);
+    free(list);
+}
+
 List * createList(int capacity, const FieldInfo *field_info) {
     List * list = (List*)malloc(sizeof(List));
     list->capacity = capacity;

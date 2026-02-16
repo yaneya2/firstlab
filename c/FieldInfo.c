@@ -1,55 +1,39 @@
 #include <stddef.h>
 #include "../headers/FieldInfo.h"
-
-#include <stdlib.h>
-//
-// Created by Vasya on 07.02.2026.
-//
-#include <stdio.h>
 #include <windows.h>
 #define STRING_SIZE 50
 FieldInfo *DOUBLE_FIELD_INFO = NULL;
 FieldInfo *STRING_FIELD_INFO = NULL;
 
-boolean doubleCompare(const void * a, const void * b) {
+boolean doubleCompare(const void *a, const void *b) {
     if (a == NULL || b == NULL) return FALSE;
-    double * double_a = (double *) a;
-    double * double_b = (double *) b;
+    double *double_a = (double *)a;
+    double *double_b = (double *)b;
     if (*double_a < *double_b) return FALSE;
     return TRUE;
 }
-boolean stringCompare(const void * a, const void * b) {
+boolean stringCompare(const void *a, const void *b) {
     if (a == NULL || b == NULL) return FALSE;
-    char *string_a = (char *) a;
-    char *string_b = (char *) b;
+    char *string_a = (char *)a;
+    char *string_b = (char *)b;
     return strcmp(string_a, string_b) <= 0 ? FALSE : TRUE;
 }
-// char * doubleToString(const void * p) {
-//     if (p == NULL) return NULL;
-//     char * res = (char *)malloc(50);
-//     sprintf(res, "%.3lf", *((double *) p));
-//     return res;
-// }
-//
-// char * charToString(const void * p) {
-//     return (char *)p;
-// }
 void * doubleAllocate() {
     return malloc(sizeof(double));
 }
 void * stringAllocate() {
     return malloc(STRING_SIZE);//возможно тут лучше по другому
 }
-void stringDeallocate(void * ptr) {
+void stringDeallocate(void *ptr) {
     free(ptr);
 }
-void doubleDeallocate(void * ptr) {
+void doubleDeallocate(void *ptr) {
     free(ptr);
 }
-void doubleAssign(void * res, void * arg) {
+void doubleAssign(void *res, void *arg) {
     memcpy(res, arg, sizeof(double));
 }
-void stringAssign(void * res, void * arg) {
+void stringAssign(void *res, void *arg) {
     memcpy(res, arg, STRING_SIZE);
 }
 const FieldInfo * getDoubleFieldInfo() {
@@ -61,7 +45,6 @@ const FieldInfo * getDoubleFieldInfo() {
         DOUBLE_FIELD_INFO->allocate = doubleAllocate;
         DOUBLE_FIELD_INFO->deallocate = doubleDeallocate;
         DOUBLE_FIELD_INFO->assign = doubleAssign;
-        //DOUBLE_FIELD_INFO->toString = doubleToString;
     }
     return DOUBLE_FIELD_INFO;
 }
@@ -74,7 +57,6 @@ const FieldInfo * getStringFieldInfo() {
         STRING_FIELD_INFO->allocate = stringAllocate;
         STRING_FIELD_INFO->deallocate = stringDeallocate;
         STRING_FIELD_INFO->assign = stringAssign;
-        //STRING_FIELD_INFO->toString = charToString;
     }
     return STRING_FIELD_INFO;
 }

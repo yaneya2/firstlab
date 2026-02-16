@@ -25,5 +25,6 @@ void map(List *list, void * (*function)(void *));
 void where(List *list, boolean (*function)(const void *));
 List * concat(const List *list1, const List *list2);
 void sort(List *list);
+void deleteList(List *list);
 
 #endif //FIRSTLAB_LIST_H
