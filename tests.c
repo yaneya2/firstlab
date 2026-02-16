@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include <string.h>
+#include <math.h>
 
 void test_createList_with_capacity() {
     printf("--- Testing createList with capacity ---\n");
@@ -291,6 +292,223 @@ void test_edge_cases() {
     printf("PASS: edge cases\n");
 }
 
+void test_capacity_extension() {
+    printf("--- Testing capacity extension ---\n");
+
+    const FieldInfo *stringFieldInfo = getStringFieldInfo();
+    List *list = createList(2, stringFieldInfo);  // Start with small capacity
+
+    // Add elements beyond initial capacity to trigger expansion
+    char str1[] = "First";
+    char str2[] = "Second";
+    char str3[] = "Third";  // This should trigger capacity expansion
+    char str4[] = "Fourth";
+    char str5[] = "Fifth";
+
+    assert(list->capacity == 2 && "Initial capacity should be 2");
+    assert(list->size == 0 && "Initial size should be 0");
+
+    add(list, str1);
+    assert(list->capacity == 2 && "Capacity should remain 2 after adding first element");
+    assert(list->size == 1 && "Size should be 1 after adding first element");
+
+    add(list, str2);
+    assert(list->capacity == 2 && "Capacity should remain 2 after adding second element");
+    assert(list->size == 2 && "Size should be 2 after adding second element");
+
+    add(list, str3);
+    assert(list->capacity == 4 && "Capacity should double to 4 after exceeding initial capacity");
+    assert(list->size == 3 && "Size should be 3 after adding third element");
+
+    add(list, str4);
+    assert(list->capacity == 4 && "Capacity should remain 4 after adding fourth element");
+    assert(list->size == 4 && "Size should be 4 after adding fourth element");
+
+    add(list, str5);
+    assert(list->capacity == 8 && "Capacity should double to 8 after exceeding extended capacity");
+    assert(list->size == 5 && "Size should be 5 after adding fifth element");
+
+    // Verify all elements are accessible
+    assert(strcmp((char*)get(list, 0), "First") == 0 && "First element should be 'First'");
+    assert(strcmp((char*)get(list, 1), "Second") == 0 && "Second element should be 'Second'");
+    assert(strcmp((char*)get(list, 2), "Third") == 0 && "Third element should be 'Third'");
+    assert(strcmp((char*)get(list, 3), "Fourth") == 0 && "Fourth element should be 'Fourth'");
+    assert(strcmp((char*)get(list, 4), "Fifth") == 0 && "Fifth element should be 'Fifth'");
+
+    deleteList(list);
+    printf("PASS: capacity extension\n");
+}
+
+void test_double_operations() {
+    printf("--- Testing operations with double values ---\n");
+
+    const FieldInfo *doubleFieldInfo = getDoubleFieldInfo();
+    List *list = createEmptyList(doubleFieldInfo);
+
+    double val1 = 3.14;
+    double val2 = 2.71;
+    double val3 = 1.41;
+
+    add(list, &val1);
+    add(list, &val2);
+    add(list, &val3);
+
+    assert(list->size == 3 && "Size should be 3 after adding 3 doubles");
+
+    // Check values using proper comparison for doubles
+    double *retrieved_val1 = (double*)get(list, 0);
+    double *retrieved_val2 = (double*)get(list, 1);
+    double *retrieved_val3 = (double*)get(list, 2);
+
+    assert(fabs(*retrieved_val1 - 3.14) < 1e-9 && "First element should be 3.14");
+    assert(fabs(*retrieved_val2 - 2.71) < 1e-9 && "Second element should be 2.71");
+    assert(fabs(*retrieved_val3 - 1.41) < 1e-9 && "Third element should be 1.41");
+
+    // Test set operation with doubles
+    double newVal = 9.99;
+    set(list, 1, &newVal);
+    double *updatedVal = (double*)get(list, 1);
+    assert(fabs(*updatedVal - 9.99) < 1e-9 && "Second element should be updated to 9.99");
+
+    // Test sort with doubles
+    double val4 = 0.5;
+    double val5 = 5.0;
+    add(list, &val4);
+    add(list, &val5);
+
+    sort(list);
+
+    // After sorting: 0.5, 1.41, 3.14, 5.0, 9.99
+    double *sortedVal0 = (double*)get(list, 0);
+    double *sortedVal1 = (double*)get(list, 1);
+    double *sortedVal2 = (double*)get(list, 2);
+    double *sortedVal3 = (double*)get(list, 3);
+    double *sortedVal4 = (double*)get(list, 4);
+
+    assert(fabs(*sortedVal0 - 0.5) < 1e-9 && "First sorted element should be 0.5");
+    assert(fabs(*sortedVal1 - 1.41) < 1e-9 && "Second sorted element should be 1.41");
+    assert(fabs(*sortedVal2 - 3.14) < 1e-9 && "Third sorted element should be 3.14");
+    assert(fabs(*sortedVal3 - 5.0) < 1e-9 && "Fourth sorted element should be 5.0");
+    assert(fabs(*sortedVal4 - 9.99) < 1e-9 && "Fifth sorted element should be 9.99");
+
+    deleteList(list);
+    printf("PASS: double operations\n");
+}
+
+void test_empty_list_operations() {
+    printf("--- Testing operations on empty lists ---\n");
+
+    const FieldInfo *stringFieldInfo = getStringFieldInfo();
+    List *emptyList = createEmptyList(stringFieldInfo);
+
+    // Test get on empty list
+    assert(get(emptyList, 0) == NULL && "get on empty list should return NULL");
+    assert(get(emptyList, -1) == NULL && "get with negative index on empty list should return NULL");
+
+    // Test set on empty list (should do nothing)
+    char newValue[] = "ShouldNotSet";
+    set(emptyList, 0, newValue);
+    assert(emptyList->size == 0 && "set on empty list should not change size");
+
+    // Test operations on empty list shouldn't crash
+    map(emptyList, toUpper);
+    where(emptyList, startsWithT);
+    
+    // Test sort on empty list
+    sort(emptyList);
+
+    deleteList(emptyList);
+    printf("PASS: empty list operations\n");
+}
+
+void test_index_boundary_conditions() {
+    printf("--- Testing index boundary conditions ---\n");
+
+    const FieldInfo *stringFieldInfo = getStringFieldInfo();
+    List *list = createEmptyList(stringFieldInfo);
+
+    char str1[] = "First";
+    char str2[] = "Second";
+
+    add(list, str1);
+    add(list, str2);
+
+    // Test valid indices
+    assert(get(list, 0) != NULL && "Valid index 0 should return non-NULL");
+    assert(get(list, 1) != NULL && "Valid index 1 should return non-NULL");
+
+    // Test boundary invalid indices
+    assert(get(list, -1) == NULL && "Negative index should return NULL");
+    assert(get(list, 2) == NULL && "Index equal to size should return NULL");
+    assert(get(list, 100) == NULL && "Large out-of-bounds index should return NULL");
+
+    // Test set with boundary conditions
+    char newValue[] = "New";
+    set(list, 2, newValue);  // Out of bounds, should not modify
+    assert(list->size == 2 && "set with out-of-bounds index should not change size");
+
+    set(list, -1, newValue);  // Negative index, should not modify
+    assert(list->size == 2 && "set with negative index should not change size");
+
+    deleteList(list);
+    printf("PASS: index boundary conditions\n");
+}
+
+void test_concat_scenarios() {
+    printf("--- Testing various concatenation scenarios ---\n");
+
+    const FieldInfo *stringFieldInfo = getStringFieldInfo();
+
+    // Test concatenating two non-empty lists
+    List *list1 = createEmptyList(stringFieldInfo);
+    List *list2 = createEmptyList(stringFieldInfo);
+
+    char str1[] = "A";
+    char str2[] = "B";
+    char str3[] = "C";
+    char str4[] = "D";
+
+    add(list1, str1);
+    add(list1, str2);
+
+    add(list2, str3);
+    add(list2, str4);
+
+    List *concatenated = concat(list1, list2);
+    assert(concatenated != NULL && "Concatenation of two non-empty lists should succeed");
+    assert(concatenated->size == 4 && "Concatenated list should have size 4");
+    assert(strcmp((char*)get(concatenated, 0), "A") == 0 && "First element should be 'A'");
+    assert(strcmp((char*)get(concatenated, 1), "B") == 0 && "Second element should be 'B'");
+    assert(strcmp((char*)get(concatenated, 2), "C") == 0 && "Third element should be 'C'");
+    assert(strcmp((char*)get(concatenated, 3), "D") == 0 && "Fourth element should be 'D'");
+
+    deleteList(concatenated);
+
+    // Test concatenating with empty list
+    List *emptyList = createEmptyList(stringFieldInfo);
+    List *concatWithEmpty = concat(list1, emptyList);
+    assert(concatWithEmpty != NULL && "Concatenation with empty list should succeed");
+    assert(concatWithEmpty->size == 2 && "Result should have same size as non-empty list");
+    assert(strcmp((char*)get(concatWithEmpty, 0), "A") == 0 && "First element should be 'A'");
+    assert(strcmp((char*)get(concatWithEmpty, 1), "B") == 0 && "Second element should be 'B'");
+
+    deleteList(concatWithEmpty);
+
+    // Test concatenating empty with non-empty
+    List *emptyWithConcat = concat(emptyList, list1);
+    assert(emptyWithConcat != NULL && "Concatenation of empty with non-empty should succeed");
+    assert(emptyWithConcat->size == 2 && "Result should have same size as non-empty list");
+    assert(strcmp((char*)get(emptyWithConcat, 0), "A") == 0 && "First element should be 'A'");
+    assert(strcmp((char*)get(emptyWithConcat, 1), "B") == 0 && "Second element should be 'B'");
+
+    deleteList(emptyWithConcat);
+    deleteList(list1);
+    deleteList(list2);
+    deleteList(emptyList);
+
+    printf("PASS: concatenation scenarios\n");
+}
+
 void test_string_operations() {
     printf("--- Testing string operations with special characters ---\n");
 
@@ -332,6 +550,11 @@ int main() {
     test_sort();
     test_deleteList();
     test_edge_cases();
+    test_capacity_extension();
+    test_double_operations();
+    test_empty_list_operations();
+    test_index_boundary_conditions();
+    test_concat_scenarios();
     test_string_operations();
 
     printf("All tests passed!\n");
