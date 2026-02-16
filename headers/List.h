@@ -5,7 +5,7 @@
 #ifndef FIRSTLAB_LIST_H
 #define FIRSTLAB_LIST_H
 #include <stdio.h>
-#include <windows.h>
+#include <stdlib.h>
 
 #include "FieldInfo.h"
 #define CAPACITY 10

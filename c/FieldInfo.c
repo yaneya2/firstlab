@@ -1,6 +1,7 @@
-#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "../headers/FieldInfo.h"
-#include <windows.h>
 #define STRING_SIZE 50
 FieldInfo *DOUBLE_FIELD_INFO = NULL;
 FieldInfo *STRING_FIELD_INFO = NULL;
