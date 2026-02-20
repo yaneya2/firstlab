@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "../headers/List.h"
-#include "../headers/FieldInfo.h"
+#include <string.h>
 
+#include "../headers/FieldInfo.h"
+#include "../headers/List.h"
+#include  "../headers/UsersStruct.h"
 // Внешние переменные для хранения текущего списка и типа данных
 static List *current_list = NULL;
 
