@@ -2,9 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../headers/FieldInfo.h"
+#include "../headers/UsersStruct.h"
 #define STRING_SIZE 50
 FieldInfo *DOUBLE_FIELD_INFO = NULL;
 FieldInfo *STRING_FIELD_INFO = NULL;
+FieldInfo *POINT_FIELD_INFO = NULL;
 
 boolean doubleCompare(const void *a, const void *b) {
     if (a == NULL || b == NULL) return FALSE;
@@ -19,11 +21,21 @@ boolean stringCompare(const void *a, const void *b) {
     char *string_b = (char *)b;
     return strcmp(string_a, string_b) <= 0 ? FALSE : TRUE;
 }
+boolean PointCompare(const void *a, const void *b) {
+    if (a == NULL || b == NULL) return FALSE;
+    Point *point_a = (Point *)a;
+    Point *point_b = (Point *)b;
+    return (point_a->x * point_a->x + point_a->y * point_a->y) > (point_b->x * point_b->x + point_b->y * point_b->y);
+
+}
 void * doubleAllocate() {
     return malloc(sizeof(double));
 }
 void * stringAllocate() {
     return malloc(STRING_SIZE);//возможно тут лучше по другому
+}
+void * pointAllocate() {
+    return malloc(sizeof(Point));
 }
 void stringDeallocate(void *ptr) {
     free(ptr);
@@ -31,11 +43,17 @@ void stringDeallocate(void *ptr) {
 void doubleDeallocate(void *ptr) {
     free(ptr);
 }
+void pointDeallocate(void *ptr) {
+    free(ptr);
+}
 void doubleAssign(void *res, void *arg) {
     memcpy(res, arg, sizeof(double));
 }
 void stringAssign(void *res, void *arg) {
     memcpy(res, arg, STRING_SIZE);
+}
+void pointAssign(void *res, void *arg) {
+    memcpy(res, arg, sizeof(Point));
 }
 const FieldInfo * getDoubleFieldInfo() {
     if (DOUBLE_FIELD_INFO == NULL) {
@@ -60,5 +78,17 @@ const FieldInfo * getStringFieldInfo() {
         STRING_FIELD_INFO->assign = stringAssign;
     }
     return STRING_FIELD_INFO;
+}
+const FieldInfo * getPointFieldInfo() {
+    if (POINT_FIELD_INFO == NULL) {
+        POINT_FIELD_INFO = (FieldInfo *)malloc(sizeof(FieldInfo));
+        POINT_FIELD_INFO->size = PTR_SIZE;
+        POINT_FIELD_INFO->name = "point";
+        POINT_FIELD_INFO->compare = PointCompare;
+        POINT_FIELD_INFO->allocate = pointAllocate;
+        POINT_FIELD_INFO->deallocate = pointDeallocate;
+        POINT_FIELD_INFO->assign = pointAssign;
+    }
+    return POINT_FIELD_INFO;
 }
 

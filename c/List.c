@@ -14,15 +14,10 @@ List * createEmptyList(const FieldInfo *field_info) {
 }
 void * get(const List *list, int index) {
     if (list == NULL || index < 0 || index >= list->size) return NULL;
-    // void ** t = (void **)list->data;
-    // return t[index];
     return list->data[index];
 }
 void set(List *list, int index, const void *ell) {
     if (list == NULL || index < 0 || index >= list->size) return;
-    // void ** t = (void **)list->data;
-    // t[index] = list->field_info->allocate();
-    // list->field_info->assign(t[index], ell);
     list->data[index] = list->field_info->allocate();
     list->field_info->assign(list->data[index], ell);
 }

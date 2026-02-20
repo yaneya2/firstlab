@@ -4,8 +4,6 @@
 #ifndef FIRSTLAB_FIELDINFO_H
 #define FIRSTLAB_FIELDINFO_H
 typedef enum { FALSE = 0, TRUE = 1 } boolean;
-#include <stdlib.h>
-#include <string.h>
 #include "Allocator.h"
 #define PTR_SIZE 8
 typedef void (*UnaryOperator)(void *, void *);
@@ -22,4 +20,5 @@ typedef struct {
 } FieldInfo;
 const FieldInfo *getDoubleFieldInfo();
 const FieldInfo *getStringFieldInfo();
+const FieldInfo *getPointFieldInfo();
 #endif //FIRSTLAB_FIELDINFO_H

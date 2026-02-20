@@ -13,7 +13,6 @@ typedef struct {
     int capacity;
     int size;
     FieldInfo *field_info;
-    //void * data;
     void ** data;
 }List;
 List * createList(int capacity, const FieldInfo *field_info);
