@@ -17,7 +17,37 @@ extern const FieldInfo * getPointFieldInfo();
 void clearList() {
     deleteList(current_list);
 }
+// Безопасное чтение целого числа с очисткой буфера
+int readInt(const char *prompt) {
+    int value;
+    while (1) {
+        printf("%s", prompt);
+        if (scanf("%d", &value) == 1) {
+            // Очищаем буфер до конца строки
+            while (getchar() != '\n');
+            return value;
+        } else {
+            printf("Invalid input. Please enter an integer.\n");
+            // Очищаем некорректный ввод
+            while (getchar() != '\n');
+        }
+    }
+}
 
+// Безопасное чтение вещественного числа
+double readDouble(const char *prompt) {
+    double value;
+    while (1) {
+        printf("%s", prompt);
+        if (scanf("%lf", &value) == 1) {
+            while (getchar() != '\n');
+            return value;
+        } else {
+            printf("Invalid input. Please enter a real number.\n");
+            while (getchar() != '\n');
+        }
+    }
+}
 // Вспомогательные функции для проверки map и where
 
 // Проверочная функция для where для double (фильтр: положительные числа)
@@ -82,12 +112,11 @@ void* incrementPointFunction(void *element) {
     return new_point;
 }
 
-// Консольный интерфейс для работы с double
 void doubleUI() {
     int choice;
     double value;
     int index;
-    
+
     while(1) {
         printf("\n=== Double List Menu ===\n");
         printf("1. Create list\n");
@@ -100,12 +129,11 @@ void doubleUI() {
         printf("8. Print all elements\n");
         printf("9. Delete list and all elements\n");
         printf("0. Exit\n");
-        printf("Enter your choice: ");
-        
-        scanf("%d", &choice);
-        
+
+        choice = readInt("Enter your choice: ");
+
         switch(choice) {
-            case 1: // Создание листа
+            case 1:
                 if (current_list != NULL) {
                     printf("Warning: Current list will be deleted. ");
                     clearList();
@@ -113,25 +141,23 @@ void doubleUI() {
                 current_list = createEmptyList(getDoubleFieldInfo());
                 printf("Double list created successfully.\n");
                 break;
-                
-            case 2: // Добавление элемента
+
+            case 2:
                 if (current_list == NULL) {
                     printf("Error: No list created. Create a list first.\n");
                     break;
                 }
-                printf("Enter double value to add: ");
-                scanf("%lf", &value);
+                value = readDouble("Enter double value to add: ");
                 add(current_list, &value);
                 printf("Element added successfully.\n");
                 break;
-                
-            case 3: // Получение элемента
+
+            case 3:
                 if (current_list == NULL) {
                     printf("Error: No list created.\n");
                     break;
                 }
-                printf("Enter index to get element: ");
-                scanf("%d", &index);
+                index = readInt("Enter index to get element: ");
                 if (index >= 0 && index < current_list->size) {
                     double* element = (double*)get(current_list, index);
                     if (element != NULL) {
@@ -140,11 +166,11 @@ void doubleUI() {
                         printf("Error getting element.\n");
                     }
                 } else {
-                    printf("Invalid index.\n");
+                    printf("Invalid index. Please enter a number between 0 and %d.\n", current_list->size - 1);
                 }
                 break;
-                
-            case 4: // Сортировка листа
+
+            case 4:
                 if (current_list == NULL) {
                     printf("Error: No list created.\n");
                     break;
@@ -152,8 +178,8 @@ void doubleUI() {
                 sort(current_list);
                 printf("List sorted successfully.\n");
                 break;
-                
-            case 5: // Конкатенация листа с самим собой
+
+            case 5:
                 if (current_list == NULL) {
                     printf("Error: No list created.\n");
                     break;
@@ -161,10 +187,7 @@ void doubleUI() {
                 {
                     List* temp = concat(current_list, current_list);
                     if (temp != NULL) {
-                        // Освобождаем старый список
                         deleteList(current_list);
-                        
-                        // Присваиваем новый конкатенированный список
                         current_list = temp;
                         printf("List concatenated with itself successfully.\n");
                     } else {
@@ -172,32 +195,26 @@ void doubleUI() {
                     }
                 }
                 break;
-                
-            case 6: // Применение where
+
+            case 6:
                 if (current_list == NULL) {
                     printf("Error: No list created.\n");
                     break;
                 }
-                // Предполагаем, что есть функция для фильтрации, например, больше 0
                 printf("Applying where filter (positive numbers only)\n");
-                // Для демонстрации, предположим, что у нас есть функция фильтрации
                 where(current_list, positiveFilterFunction);
-                printf("Note: Filter function needs to be implemented separately.\n");
                 break;
-                
-            case 7: // Применение map
+
+            case 7:
                 if (current_list == NULL) {
                     printf("Error: No list created.\n");
                     break;
                 }
-                // Предполагаем, что есть функция для отображения, например, удвоение
                 printf("Applying map (doubling values)\n");
-                // Для демонстрации, предположим, что у нас есть функция отображения
                 map(current_list, doubleValueFunction);
-                printf("Note: Map function needs to be implemented separately.\n");
                 break;
-                
-            case 8: // Вывод всех элементов
+
+            case 8:
                 if (current_list == NULL) {
                     printf("Error: No list created.\n");
                     break;
@@ -211,33 +228,32 @@ void doubleUI() {
                 }
                 printf("\n");
                 break;
-                
-            case 9: // Удаление листа и всех его элементов
+
+            case 9:
                 clearList();
                 current_list = NULL;
                 printf("List and all elements deleted.\n");
                 break;
-                
-            case 0: // Выход
+
+            case 0:
                 if (current_list != NULL) {
                     clearList();
                 }
                 printf("Exiting double UI...\n");
                 return;
-                
+
             default:
-                printf("Invalid choice. Please try again.\n");
+                printf("Invalid choice. Please enter a number from the menu options.\n");
                 break;
         }
     }
 }
 
-// Консольный интерфейс для работы с точками
 void pointUI() {
     int choice;
     Point value;
     int index;
-    
+
     while(1) {
         printf("\n=== Point List Menu ===\n");
         printf("1. Create list\n");
@@ -250,12 +266,11 @@ void pointUI() {
         printf("8. Print all elements\n");
         printf("9. Delete list and all elements\n");
         printf("0. Exit\n");
-        printf("Enter your choice: ");
-        
-        scanf("%d", &choice);
-        
+
+        choice = readInt("Enter your choice: ");
+
         switch(choice) {
-            case 1: // Создание листа
+            case 1:
                 if (current_list != NULL) {
                     printf("Warning: Current list will be deleted. ");
                     clearList();
@@ -263,29 +278,25 @@ void pointUI() {
                 current_list = createEmptyList(getPointFieldInfo());
                 printf("Point list created successfully.\n");
                 break;
-                
-            case 2: // Добавление элемента
+
+            case 2:
                 if (current_list == NULL) {
                     printf("Error: No list created. Create a list first.\n");
                     break;
                 }
-                printf("Enter x coordinate: ");
-                scanf("%lf", &value.x);
-                printf("Enter y coordinate: ");
-                scanf("%lf", &value.y);
-                printf("Enter z coordinate: ");
-                scanf("%lf", &value.z);
+                value.x = readDouble("Enter x coordinate: ");
+                value.y = readDouble("Enter y coordinate: ");
+                value.z = readDouble("Enter z coordinate: ");
                 add(current_list, &value);
                 printf("Element added successfully.\n");
                 break;
-                
-            case 3: // Получение элемента
+
+            case 3:
                 if (current_list == NULL) {
                     printf("Error: No list created.\n");
                     break;
                 }
-                printf("Enter index to get element: ");
-                scanf("%d", &index);
+                index = readInt("Enter index to get element: ");
                 if (index >= 0 && index < current_list->size) {
                     Point* element = (Point*)get(current_list, index);
                     if (element != NULL) {
@@ -294,11 +305,11 @@ void pointUI() {
                         printf("Error getting element.\n");
                     }
                 } else {
-                    printf("Invalid index.\n");
+                    printf("Invalid index. Please enter a number between 0 and %d.\n", current_list->size - 1);
                 }
                 break;
-                
-            case 4: // Сортировка листа
+
+            case 4:
                 if (current_list == NULL) {
                     printf("Error: No list created.\n");
                     break;
@@ -306,8 +317,8 @@ void pointUI() {
                 sort(current_list);
                 printf("List sorted successfully.\n");
                 break;
-                
-            case 5: // Конкатенация листа с самим собой
+
+            case 5:
                 if (current_list == NULL) {
                     printf("Error: No list created.\n");
                     break;
@@ -315,10 +326,7 @@ void pointUI() {
                 {
                     List* temp = concat(current_list, current_list);
                     if (temp != NULL) {
-                        // Освобождаем старый список
                         deleteList(current_list);
-                        
-                        // Присваиваем новый конкатенированный список
                         current_list = temp;
                         printf("List concatenated with itself successfully.\n");
                     } else {
@@ -326,28 +334,26 @@ void pointUI() {
                     }
                 }
                 break;
-                
-            case 6: // Применение where
+
+            case 6:
                 if (current_list == NULL) {
                     printf("Error: No list created.\n");
                     break;
                 }
                 printf("Applying where filter (points with positive coordinates only)\n");
                 where(current_list, positivePointFilterFunction);
-                printf("Note: Filter function applied.\n");
                 break;
-                
-            case 7: // Применение map
+
+            case 7:
                 if (current_list == NULL) {
                     printf("Error: No list created.\n");
                     break;
                 }
                 printf("Applying map (incrementing coordinates by 1)\n");
                 map(current_list, incrementPointFunction);
-                printf("Note: Map function applied.\n");
                 break;
-                
-            case 8: // Вывод всех элементов
+
+            case 8:
                 if (current_list == NULL) {
                     printf("Error: No list created.\n");
                     break;
@@ -361,34 +367,32 @@ void pointUI() {
                 }
                 printf("\n");
                 break;
-                
-            case 9: // Удаление листа и всех его элементов
+
+            case 9:
                 clearList();
                 current_list = NULL;
                 printf("List and all elements deleted.\n");
                 break;
-                
-            case 0: // Выход
+
+            case 0:
                 if (current_list != NULL) {
                     clearList();
                 }
                 printf("Exiting point UI...\n");
                 return;
-                
+
             default:
-                printf("Invalid choice. Please try again.\n");
+                printf("Invalid choice. Please enter a number from the menu options.\n");
                 break;
         }
     }
 }
 
-// Консольный интерфейс для работы со строками
 void stringUI() {
-
     int choice;
     char buffer[256];
     int index;
-    
+
     while(1) {
         printf("\n=== String List Menu ===\n");
         printf("1. Create list\n");
@@ -401,13 +405,11 @@ void stringUI() {
         printf("8. Print all elements\n");
         printf("9. Delete list and all elements\n");
         printf("0. Exit\n");
-        printf("Enter your choice: ");
-        
-        scanf("%d", &choice);
-        getchar(); // Пропуск символа новой строки после числа
-        
+
+        choice = readInt("Enter your choice: ");
+
         switch(choice) {
-            case 1: // Создание листа
+            case 1:
                 if (current_list != NULL) {
                     printf("Warning: Current list will be deleted. ");
                     clearList();
@@ -415,27 +417,25 @@ void stringUI() {
                 current_list = createEmptyList(getStringFieldInfo());
                 printf("String list created successfully.\n");
                 break;
-                
-            case 2: // Добавление элемента
+
+            case 2:
                 if (current_list == NULL) {
                     printf("Error: No list created. Create a list first.\n");
                     break;
                 }
                 printf("Enter string to add: ");
                 fgets(buffer, sizeof(buffer), stdin);
-                // Удаляем символ новой строки
                 buffer[strcspn(buffer, "\n")] = 0;
                 add(current_list, buffer);
                 printf("Element added successfully.\n");
                 break;
-                
-            case 3: // Получение элемента
+
+            case 3:
                 if (current_list == NULL) {
                     printf("Error: No list created.\n");
                     break;
                 }
-                printf("Enter index to get element: ");
-                scanf("%d", &index);
+                index = readInt("Enter index to get element: ");
                 if (index >= 0 && index < current_list->size) {
                     char *element = (char*)get(current_list, index);
                     if (element != NULL) {
@@ -444,11 +444,11 @@ void stringUI() {
                         printf("Error getting element.\n");
                     }
                 } else {
-                    printf("Invalid index.\n");
+                    printf("Invalid index. Please enter a number between 0 and %d.\n", current_list->size - 1);
                 }
                 break;
-                
-            case 4: // Сортировка листа
+
+            case 4:
                 if (current_list == NULL) {
                     printf("Error: No list created.\n");
                     break;
@@ -456,43 +456,39 @@ void stringUI() {
                 sort(current_list);
                 printf("List sorted successfully.\n");
                 break;
-                
-            case 5: // Конкатенация листа с самим собой
+
+            case 5:
                 if (current_list == NULL) {
                     printf("Error: No list created.\n");
                     break;
                 }
-                List *temp = concat(current_list, current_list);
-                // Освобождаем старый список
-                deleteList(current_list);
-                // Присваиваем новый конкатенированный список
-                current_list = temp;
-                printf("List concatenated with itself successfully.\n");
+                {
+                    List *temp = concat(current_list, current_list);
+                    deleteList(current_list);
+                    current_list = temp;
+                    printf("List concatenated with itself successfully.\n");
+                }
                 break;
-                
-            case 6: // Применение where
+
+            case 6:
                 if (current_list == NULL) {
                     printf("Error: No list created.\n");
                     break;
                 }
                 printf("Applying where filter (strings longer than 3 chars)\n");
-                // Для демонстрации, предположим, что у нас есть функция фильтрации
                 where(current_list, stringLengthFilterFunction);
-                printf("Note: Filter function needs to be implemented separately.\n");
                 break;
-                
-            case 7: // Применение map
+
+            case 7:
                 if (current_list == NULL) {
                     printf("Error: No list created.\n");
                     break;
                 }
                 printf("Applying map (converting to uppercase)\n");
-                // Для демонстрации, предположим, что у нас есть функция отображения
                 map(current_list, toUppercaseFunction);
-                printf("Note: Map function needs to be implemented separately.\n");
                 break;
-                
-            case 8: // Вывод всех элементов
+
+            case 8:
                 if (current_list == NULL) {
                     printf("Error: No list created.\n");
                     break;
@@ -502,23 +498,24 @@ void stringUI() {
                     char *element = (char*)get(current_list, i);
                     if (element != NULL) {
                         printf("\"%s\"", element);
+                        if (i < current_list->size - 1) printf(", ");
                     }
                 }
                 printf("]\n");
                 break;
-                
-            case 9: // Удаление листа и всех его элементов
+
+            case 9:
                 clearList();
                 current_list = NULL;
                 printf("List and all elements deleted.\n");
                 break;
-                
-            case 0: // Выход
+
+            case 0:
                 printf("Exiting string UI...\n");
                 return;
-                
+
             default:
-                printf("Invalid choice. Please try again.\n");
+                printf("Invalid choice. Please enter a number from the menu options.\n");
                 break;
         }
     }
