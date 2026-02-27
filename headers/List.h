@@ -19,7 +19,7 @@ List * createList(int capacity, const FieldInfo *field_info);
 List * createEmptyList(const FieldInfo *field_info);
 void add(List * list,const void * ell);
 void * get(const List * list, int index);
-void set(List * list, int index, const void * ell);
+static void set(List * list, int index, const void * ell);
 void map(List *list, void * (*function)(void *));
 void where(List *list, boolean (*function)(const void *));
 List * concat(const List *list1, const List *list2);

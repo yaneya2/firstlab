@@ -27,7 +27,7 @@ int readInt(const char *prompt) {
             while (getchar() != '\n');
             return value;
         } else {
-            printf("Invalid input. Please enter an integer.\n");
+            printf("Invalid input. Please enter an integer.\n\n");
             // Очищаем некорректный ввод
             while (getchar() != '\n');
         }
@@ -43,7 +43,7 @@ double readDouble(const char *prompt) {
             while (getchar() != '\n');
             return value;
         } else {
-            printf("Invalid input. Please enter a real number.\n");
+            printf("Invalid input. Please enter a real number.\n\n");
             while (getchar() != '\n');
         }
     }
