@@ -3,26 +3,28 @@
 #include <string.h>
 #include "../headers/FieldInfo.h"
 #include "../headers/UsersStruct.h"
+
 #define STRING_SIZE 50
+
 static FieldInfo *DOUBLE_FIELD_INFO = NULL;
 static FieldInfo *STRING_FIELD_INFO = NULL;
 static FieldInfo *POINT_FIELD_INFO = NULL;
 
-static boolean doubleCompare(const void *a, const void *b) {
-    if (a == NULL || b == NULL) return FALSE;
+static bool doubleCompare(const void *a, const void *b) {
+    if (a == NULL || b == NULL) return false;
     double *double_a = (double *)a;
     double *double_b = (double *)b;
-    if (*double_a < *double_b) return FALSE;
-    return TRUE;
+    if (*double_a < *double_b) return false;
+    return true;
 }
-static boolean stringCompare(const void *a, const void *b) {
-    if (a == NULL || b == NULL) return FALSE;
+static bool stringCompare(const void *a, const void *b) {
+    if (a == NULL || b == NULL) return false;
     char *string_a = (char *)a;
     char *string_b = (char *)b;
-    return strcmp(string_a, string_b) <= 0 ? FALSE : TRUE;
+    return strcmp(string_a, string_b) <= 0 ? false : true;
 }
-static boolean PointCompare(const void *a, const void *b) {
-    if (a == NULL || b == NULL) return FALSE;
+static bool PointCompare(const void *a, const void *b) {
+    if (a == NULL || b == NULL) return false;
     Point *point_a = (Point *)a;
     Point *point_b = (Point *)b;
     return (point_a->x * point_a->x + point_a->y * point_a->y) > (point_b->x * point_b->x + point_b->y * point_b->y);
@@ -32,7 +34,7 @@ static void * doubleAllocate() {
     return malloc(sizeof(double));
 }
 static void * stringAllocate() {
-    return malloc(STRING_SIZE);//возможно тут лучше по другому
+    return malloc(STRING_SIZE);
 }
 static void * pointAllocate() {
     return malloc(sizeof(Point));
@@ -58,7 +60,7 @@ static void pointAssign(void *res, void *arg) {
 const FieldInfo * getDoubleFieldInfo() {
     if (DOUBLE_FIELD_INFO == NULL) {
         DOUBLE_FIELD_INFO = (FieldInfo *)malloc(sizeof(FieldInfo));
-        DOUBLE_FIELD_INFO->size = PTR_SIZE;
+        DOUBLE_FIELD_INFO->size = sizeof(double *);
         DOUBLE_FIELD_INFO->name = "double";
         DOUBLE_FIELD_INFO->compare = doubleCompare;
         DOUBLE_FIELD_INFO->allocate = doubleAllocate;
@@ -70,7 +72,7 @@ const FieldInfo * getDoubleFieldInfo() {
 const FieldInfo * getStringFieldInfo() {
     if (STRING_FIELD_INFO == NULL) {
         STRING_FIELD_INFO = (FieldInfo *)malloc(sizeof(FieldInfo));
-        STRING_FIELD_INFO->size = PTR_SIZE;
+        STRING_FIELD_INFO->size = sizeof(char *);
         STRING_FIELD_INFO->name = "string";
         STRING_FIELD_INFO->compare = stringCompare;
         STRING_FIELD_INFO->allocate = stringAllocate;
@@ -82,7 +84,7 @@ const FieldInfo * getStringFieldInfo() {
 const FieldInfo * getPointFieldInfo() {
     if (POINT_FIELD_INFO == NULL) {
         POINT_FIELD_INFO = (FieldInfo *)malloc(sizeof(FieldInfo));
-        POINT_FIELD_INFO->size = PTR_SIZE;
+        POINT_FIELD_INFO->size = sizeof(Point *);
         POINT_FIELD_INFO->name = "point";
         POINT_FIELD_INFO->compare = PointCompare;
         POINT_FIELD_INFO->allocate = pointAllocate;

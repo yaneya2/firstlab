@@ -1,13 +1,11 @@
-//
-// Created by Vasya on 07.02.2026.
-//
 #ifndef FIRSTLAB_FIELDINFO_H
 #define FIRSTLAB_FIELDINFO_H
-typedef enum { FALSE = 0, TRUE = 1 } boolean;
+
+#include <stdbool.h>
 #include "Allocator.h"
-#define PTR_SIZE 8
+
 typedef void (*UnaryOperator)(void *, void *);
-typedef boolean (*BooleanOperator)(const void *, const void *);
+typedef bool (*BooleanOperator)(const void *, const void *);
 typedef char * (*StringOperator)(const void *);
 
 typedef struct {
@@ -18,7 +16,9 @@ typedef struct {
     Deallocator deallocate;
     BooleanOperator compare;
 } FieldInfo;
+
 const FieldInfo *getDoubleFieldInfo();
 const FieldInfo *getStringFieldInfo();
 const FieldInfo *getPointFieldInfo();
+
 #endif //FIRSTLAB_FIELDINFO_H

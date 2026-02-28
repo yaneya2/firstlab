@@ -3,10 +3,10 @@
 #include <string.h>
 
 #include "../headers/FieldInfo.h"
-#include "../headers/List.h"
+#include "../headers/DynamicArray.h"
 #include  "../headers/UsersStruct.h"
 // Внешние переменные для хранения текущего списка и типа данных
-static List *current_list = NULL;
+static DynamicArray *current_dynamicArray = NULL;
 
 // Функция для инициализации типов данных (предполагается, что они определены где-то в других файлах)
 extern const FieldInfo * getDoubleFieldInfo();
@@ -14,8 +14,8 @@ extern const FieldInfo * getStringFieldInfo();
 extern const FieldInfo * getPointFieldInfo();
 
 // Функция для очистки списка
-void clearList() {
-    deleteList(current_list);
+void clearDynamicArray() {
+    deleteDynamicArray(current_dynamicArray);
 }
 // Безопасное чтение целого числа с очисткой буфера
 int readInt(const char *prompt) {
@@ -51,7 +51,7 @@ double readDouble(const char *prompt) {
 // Вспомогательные функции для проверки map и where
 
 // Проверочная функция для where для double (фильтр: положительные числа)
-boolean positiveFilterFunction(const void *element) {
+bool positiveFilterFunction(const void *element) {
     double value = *(double*)element;
     return value > 0;
 }
@@ -64,7 +64,7 @@ void* doubleValueFunction(void *element) {
 }
 
 // Проверочная функция для where для строк (фильтр: длина строки > 3)
-boolean stringLengthFilterFunction(const void *element) {
+bool stringLengthFilterFunction(const void *element) {
     char *str = (char*)element;
     return str != NULL && strlen(str) > 3;
 }
@@ -86,30 +86,24 @@ void* toUppercaseFunction(void *element) {
         }
         upper_str[len] = '\0';
     }
-    current_list->field_info->deallocate(original_str);
+    current_dynamicArray->field_info->deallocate(original_str);
     // заменяем строку , если работать со старой, то можно вернуть ее же
     return upper_str;
 }
 
 // Проверочная функция для where для Point (фильтр: точки с положительными координатами)
-boolean positivePointFilterFunction(const void *element) {
+bool positivePointFilterFunction(const void *element) {
     Point *p = (Point*)element;
     return p != NULL && p->x > 0 && p->y > 0 && p->z > 0;
 }
 
 // Проверочная функция для map для Point (преобразование: увеличение координат на 1)
 void* incrementPointFunction(void *element) {
-    Point *original_point = (Point*)element;
-    if(original_point == NULL) return NULL;
-    
-    Point *new_point = (Point*)malloc(sizeof(Point));
-    if(new_point != NULL) {
-        new_point->x = original_point->x + 1;
-        new_point->y = original_point->y + 1;
-        new_point->z = original_point->z + 1;
-    }
-    current_list->field_info->deallocate(original_point);
-    return new_point;
+    Point *point = (Point*)element;
+    point->x += 1;
+    point->y += 1;
+    point->z += 1;
+    return point;
 }
 
 void doubleUI() {
@@ -118,110 +112,110 @@ void doubleUI() {
     int index;
 
     while(1) {
-        printf("\n=== Double List Menu ===\n");
-        printf("1. Create list\n");
+        printf("\n=== Double DynamicArray Menu ===\n");
+        printf("1. Create dynamicArray\n");
         printf("2. Add element\n");
         printf("3. Get element\n");
-        printf("4. Sort list\n");
-        printf("5. Concatenate list with itself\n");
+        printf("4. Sort dynamicArray\n");
+        printf("5. Concatenate dynamicArray with itself\n");
         printf("6. Apply where\n");
         printf("7. Apply map\n");
         printf("8. Print all elements\n");
-        printf("9. Delete list and all elements\n");
+        printf("9. Delete dynamicArray and all elements\n");
         printf("0. Exit\n");
 
         choice = readInt("Enter your choice: ");
 
         switch(choice) {
             case 1:
-                if (current_list != NULL) {
-                    printf("Warning: Current list will be deleted. ");
-                    clearList();
+                if (current_dynamicArray != NULL) {
+                    printf("Warning: Current dynamicArray will be deleted. ");
+                    clearDynamicArray();
                 }
-                current_list = createEmptyList(getDoubleFieldInfo());
-                printf("Double list created successfully.\n");
+                current_dynamicArray = createEmptyDynamicArray(getDoubleFieldInfo());
+                printf("Double dynamicArray created successfully.\n");
                 break;
 
             case 2:
-                if (current_list == NULL) {
-                    printf("Error: No list created. Create a list first.\n");
+                if (current_dynamicArray == NULL) {
+                    printf("Error: No dynamicArray created. Create a dynamicArray first.\n");
                     break;
                 }
                 value = readDouble("Enter double value to add: ");
-                add(current_list, &value);
+                add(current_dynamicArray, &value);
                 printf("Element added successfully.\n");
                 break;
 
             case 3:
-                if (current_list == NULL) {
-                    printf("Error: No list created.\n");
+                if (current_dynamicArray == NULL) {
+                    printf("Error: No dynamicArray created.\n");
                     break;
                 }
                 index = readInt("Enter index to get element: ");
-                if (index >= 0 && index < current_list->size) {
-                    double* element = (double*)get(current_list, index);
+                if (index >= 0 && index < current_dynamicArray->size) {
+                    double* element = (double*)get(current_dynamicArray, index);
                     if (element != NULL) {
                         printf("Element at index %d: %f\n", index, *element);
                     } else {
                         printf("Error getting element.\n");
                     }
                 } else {
-                    printf("Invalid index. Please enter a number between 0 and %d.\n", current_list->size - 1);
+                    printf("Invalid index. Please enter a number between 0 and %d.\n", current_dynamicArray->size - 1);
                 }
                 break;
 
             case 4:
-                if (current_list == NULL) {
-                    printf("Error: No list created.\n");
+                if (current_dynamicArray == NULL) {
+                    printf("Error: No dynamicArray created.\n");
                     break;
                 }
-                sort(current_list);
-                printf("List sorted successfully.\n");
+                sort(current_dynamicArray);
+                printf("DynamicArray sorted successfully.\n");
                 break;
 
             case 5:
-                if (current_list == NULL) {
-                    printf("Error: No list created.\n");
+                if (current_dynamicArray == NULL) {
+                    printf("Error: No dynamicArray created.\n");
                     break;
                 }
                 {
-                    List* temp = concat(current_list, current_list);
+                    DynamicArray* temp = concat(current_dynamicArray, current_dynamicArray);
                     if (temp != NULL) {
-                        deleteList(current_list);
-                        current_list = temp;
-                        printf("List concatenated with itself successfully.\n");
+                        deleteDynamicArray(current_dynamicArray);
+                        current_dynamicArray = temp;
+                        printf("DynamicArray concatenated with itself successfully.\n");
                     } else {
-                        printf("Error concatenating lists.\n");
+                        printf("Error concatenating dynamicArrays.\n");
                     }
                 }
                 break;
 
             case 6:
-                if (current_list == NULL) {
-                    printf("Error: No list created.\n");
+                if (current_dynamicArray == NULL) {
+                    printf("Error: No dynamicArray created.\n");
                     break;
                 }
                 printf("Applying where filter (positive numbers only)\n");
-                where(current_list, positiveFilterFunction);
+                where(current_dynamicArray, positiveFilterFunction);
                 break;
 
             case 7:
-                if (current_list == NULL) {
-                    printf("Error: No list created.\n");
+                if (current_dynamicArray == NULL) {
+                    printf("Error: No dynamicArray created.\n");
                     break;
                 }
                 printf("Applying map (doubling values)\n");
-                map(current_list, doubleValueFunction);
+                map(current_dynamicArray, doubleValueFunction);
                 break;
 
             case 8:
-                if (current_list == NULL) {
-                    printf("Error: No list created.\n");
+                if (current_dynamicArray == NULL) {
+                    printf("Error: No dynamicArray created.\n");
                     break;
                 }
-                printf("List elements: ");
-                for (int i = 0; i < current_list->size; i++) {
-                    double *element = (double*)get(current_list, i);
+                printf("DynamicArray elements: ");
+                for (int i = 0; i < current_dynamicArray->size; i++) {
+                    double *element = (double*)get(current_dynamicArray, i);
                     if (element != NULL) {
                         printf("%.2f ", *element);
                     }
@@ -230,14 +224,14 @@ void doubleUI() {
                 break;
 
             case 9:
-                clearList();
-                current_list = NULL;
-                printf("List and all elements deleted.\n");
+                clearDynamicArray();
+                current_dynamicArray = NULL;
+                printf("DynamicArray and all elements deleted.\n");
                 break;
 
             case 0:
-                if (current_list != NULL) {
-                    clearList();
+                if (current_dynamicArray != NULL) {
+                    clearDynamicArray();
                 }
                 printf("Exiting double UI...\n");
                 return;
@@ -255,112 +249,112 @@ void pointUI() {
     int index;
 
     while(1) {
-        printf("\n=== Point List Menu ===\n");
-        printf("1. Create list\n");
+        printf("\n=== Point DynamicArray Menu ===\n");
+        printf("1. Create dynamicArray\n");
         printf("2. Add element\n");
         printf("3. Get element\n");
-        printf("4. Sort list\n");
-        printf("5. Concatenate list with itself\n");
+        printf("4. Sort dynamicArray\n");
+        printf("5. Concatenate dynamicArray with itself\n");
         printf("6. Apply where\n");
         printf("7. Apply map\n");
         printf("8. Print all elements\n");
-        printf("9. Delete list and all elements\n");
+        printf("9. Delete dynamicArray and all elements\n");
         printf("0. Exit\n");
 
         choice = readInt("Enter your choice: ");
 
         switch(choice) {
             case 1:
-                if (current_list != NULL) {
-                    printf("Warning: Current list will be deleted. ");
-                    clearList();
+                if (current_dynamicArray != NULL) {
+                    printf("Warning: Current dynamicArray will be deleted. ");
+                    clearDynamicArray();
                 }
-                current_list = createEmptyList(getPointFieldInfo());
-                printf("Point list created successfully.\n");
+                current_dynamicArray = createEmptyDynamicArray(getPointFieldInfo());
+                printf("Point dynamicArray created successfully.\n");
                 break;
 
             case 2:
-                if (current_list == NULL) {
-                    printf("Error: No list created. Create a list first.\n");
+                if (current_dynamicArray == NULL) {
+                    printf("Error: No dynamicArray created. Create a dynamicArray first.\n");
                     break;
                 }
                 value.x = readDouble("Enter x coordinate: ");
                 value.y = readDouble("Enter y coordinate: ");
                 value.z = readDouble("Enter z coordinate: ");
-                add(current_list, &value);
+                add(current_dynamicArray, &value);
                 printf("Element added successfully.\n");
                 break;
 
             case 3:
-                if (current_list == NULL) {
-                    printf("Error: No list created.\n");
+                if (current_dynamicArray == NULL) {
+                    printf("Error: No dynamicArray created.\n");
                     break;
                 }
                 index = readInt("Enter index to get element: ");
-                if (index >= 0 && index < current_list->size) {
-                    Point* element = (Point*)get(current_list, index);
+                if (index >= 0 && index < current_dynamicArray->size) {
+                    Point* element = (Point*)get(current_dynamicArray, index);
                     if (element != NULL) {
                         printf("Element at index %d: (%.2f, %.2f, %.2f)\n", index, element->x, element->y, element->z);
                     } else {
                         printf("Error getting element.\n");
                     }
                 } else {
-                    printf("Invalid index. Please enter a number between 0 and %d.\n", current_list->size - 1);
+                    printf("Invalid index. Please enter a number between 0 and %d.\n", current_dynamicArray->size - 1);
                 }
                 break;
 
             case 4:
-                if (current_list == NULL) {
-                    printf("Error: No list created.\n");
+                if (current_dynamicArray == NULL) {
+                    printf("Error: No dynamicArray created.\n");
                     break;
                 }
-                sort(current_list);
-                printf("List sorted successfully.\n");
+                sort(current_dynamicArray);
+                printf("DynamicArray sorted successfully.\n");
                 break;
 
             case 5:
-                if (current_list == NULL) {
-                    printf("Error: No list created.\n");
+                if (current_dynamicArray == NULL) {
+                    printf("Error: No dynamicArray created.\n");
                     break;
                 }
                 {
-                    List* temp = concat(current_list, current_list);
+                    DynamicArray* temp = concat(current_dynamicArray, current_dynamicArray);
                     if (temp != NULL) {
-                        deleteList(current_list);
-                        current_list = temp;
-                        printf("List concatenated with itself successfully.\n");
+                        deleteDynamicArray(current_dynamicArray);
+                        current_dynamicArray = temp;
+                        printf("DynamicArray concatenated with itself successfully.\n");
                     } else {
-                        printf("Error concatenating lists.\n");
+                        printf("Error concatenating dynamicArrays.\n");
                     }
                 }
                 break;
 
             case 6:
-                if (current_list == NULL) {
-                    printf("Error: No list created.\n");
+                if (current_dynamicArray == NULL) {
+                    printf("Error: No dynamicArray created.\n");
                     break;
                 }
                 printf("Applying where filter (points with positive coordinates only)\n");
-                where(current_list, positivePointFilterFunction);
+                where(current_dynamicArray, positivePointFilterFunction);
                 break;
 
             case 7:
-                if (current_list == NULL) {
-                    printf("Error: No list created.\n");
+                if (current_dynamicArray == NULL) {
+                    printf("Error: No dynamicArray created.\n");
                     break;
                 }
                 printf("Applying map (incrementing coordinates by 1)\n");
-                map(current_list, incrementPointFunction);
+                map(current_dynamicArray, incrementPointFunction);
                 break;
 
             case 8:
-                if (current_list == NULL) {
-                    printf("Error: No list created.\n");
+                if (current_dynamicArray == NULL) {
+                    printf("Error: No dynamicArray created.\n");
                     break;
                 }
-                printf("List elements: ");
-                for (int i = 0; i < current_list->size; i++) {
-                    Point *element = (Point*)get(current_list, i);
+                printf("DynamicArray elements: ");
+                for (int i = 0; i < current_dynamicArray->size; i++) {
+                    Point *element = (Point*)get(current_dynamicArray, i);
                     if (element != NULL) {
                         printf("(%.2f, %.2f, %.2f) ", element->x, element->y, element->z);
                     }
@@ -369,14 +363,14 @@ void pointUI() {
                 break;
 
             case 9:
-                clearList();
-                current_list = NULL;
-                printf("List and all elements deleted.\n");
+                clearDynamicArray();
+                current_dynamicArray = NULL;
+                printf("DynamicArray and all elements deleted.\n");
                 break;
 
             case 0:
-                if (current_list != NULL) {
-                    clearList();
+                if (current_dynamicArray != NULL) {
+                    clearDynamicArray();
                 }
                 printf("Exiting point UI...\n");
                 return;
@@ -394,120 +388,120 @@ void stringUI() {
     int index;
 
     while(1) {
-        printf("\n=== String List Menu ===\n");
-        printf("1. Create list\n");
+        printf("\n=== String DynamicArray Menu ===\n");
+        printf("1. Create dynamicArray\n");
         printf("2. Add element\n");
         printf("3. Get element\n");
-        printf("4. Sort list\n");
-        printf("5. Concatenate list with itself\n");
+        printf("4. Sort dynamicArray\n");
+        printf("5. Concatenate dynamicArray with itself\n");
         printf("6. Apply where\n");
         printf("7. Apply map\n");
         printf("8. Print all elements\n");
-        printf("9. Delete list and all elements\n");
+        printf("9. Delete dynamicArray and all elements\n");
         printf("0. Exit\n");
 
         choice = readInt("Enter your choice: ");
 
         switch(choice) {
             case 1:
-                if (current_list != NULL) {
-                    printf("Warning: Current list will be deleted. ");
-                    clearList();
+                if (current_dynamicArray != NULL) {
+                    printf("Warning: Current dynamicArray will be deleted. ");
+                    clearDynamicArray();
                 }
-                current_list = createEmptyList(getStringFieldInfo());
-                printf("String list created successfully.\n");
+                current_dynamicArray = createEmptyDynamicArray(getStringFieldInfo());
+                printf("String dynamicArray created successfully.\n");
                 break;
 
             case 2:
-                if (current_list == NULL) {
-                    printf("Error: No list created. Create a list first.\n");
+                if (current_dynamicArray == NULL) {
+                    printf("Error: No dynamicArray created. Create a dynamicArray first.\n");
                     break;
                 }
                 printf("Enter string to add: ");
                 fgets(buffer, sizeof(buffer), stdin);
                 buffer[strcspn(buffer, "\n")] = 0;
-                add(current_list, buffer);
+                add(current_dynamicArray, buffer);
                 printf("Element added successfully.\n");
                 break;
 
             case 3:
-                if (current_list == NULL) {
-                    printf("Error: No list created.\n");
+                if (current_dynamicArray == NULL) {
+                    printf("Error: No dynamicArray created.\n");
                     break;
                 }
                 index = readInt("Enter index to get element: ");
-                if (index >= 0 && index < current_list->size) {
-                    char *element = (char*)get(current_list, index);
+                if (index >= 0 && index < current_dynamicArray->size) {
+                    char *element = (char*)get(current_dynamicArray, index);
                     if (element != NULL) {
                         printf("Element at index %d: %s\n", index, element);
                     } else {
                         printf("Error getting element.\n");
                     }
                 } else {
-                    printf("Invalid index. Please enter a number between 0 and %d.\n", current_list->size - 1);
+                    printf("Invalid index. Please enter a number between 0 and %d.\n", current_dynamicArray->size - 1);
                 }
                 break;
 
             case 4:
-                if (current_list == NULL) {
-                    printf("Error: No list created.\n");
+                if (current_dynamicArray == NULL) {
+                    printf("Error: No dynamicArray created.\n");
                     break;
                 }
-                sort(current_list);
-                printf("List sorted successfully.\n");
+                sort(current_dynamicArray);
+                printf("DynamicArray sorted successfully.\n");
                 break;
 
             case 5:
-                if (current_list == NULL) {
-                    printf("Error: No list created.\n");
+                if (current_dynamicArray == NULL) {
+                    printf("Error: No dynamicArray created.\n");
                     break;
                 }
                 {
-                    List *temp = concat(current_list, current_list);
-                    deleteList(current_list);
-                    current_list = temp;
-                    printf("List concatenated with itself successfully.\n");
+                    DynamicArray *temp = concat(current_dynamicArray, current_dynamicArray);
+                    deleteDynamicArray(current_dynamicArray);
+                    current_dynamicArray = temp;
+                    printf("DynamicArray concatenated with itself successfully.\n");
                 }
                 break;
 
             case 6:
-                if (current_list == NULL) {
-                    printf("Error: No list created.\n");
+                if (current_dynamicArray == NULL) {
+                    printf("Error: No dynamicArray created.\n");
                     break;
                 }
                 printf("Applying where filter (strings longer than 3 chars)\n");
-                where(current_list, stringLengthFilterFunction);
+                where(current_dynamicArray, stringLengthFilterFunction);
                 break;
 
             case 7:
-                if (current_list == NULL) {
-                    printf("Error: No list created.\n");
+                if (current_dynamicArray == NULL) {
+                    printf("Error: No dynamicArray created.\n");
                     break;
                 }
                 printf("Applying map (converting to uppercase)\n");
-                map(current_list, toUppercaseFunction);
+                map(current_dynamicArray, toUppercaseFunction);
                 break;
 
             case 8:
-                if (current_list == NULL) {
-                    printf("Error: No list created.\n");
+                if (current_dynamicArray == NULL) {
+                    printf("Error: No dynamicArray created.\n");
                     break;
                 }
-                printf("List elements: [");
-                for (int i = 0; i < current_list->size; i++) {
-                    char *element = (char*)get(current_list, i);
+                printf("DynamicArray elements: [");
+                for (int i = 0; i < current_dynamicArray->size; i++) {
+                    char *element = (char*)get(current_dynamicArray, i);
                     if (element != NULL) {
                         printf("\"%s\"", element);
-                        if (i < current_list->size - 1) printf(", ");
+                        if (i < current_dynamicArray->size - 1) printf(", ");
                     }
                 }
                 printf("]\n");
                 break;
 
             case 9:
-                clearList();
-                current_list = NULL;
-                printf("List and all elements deleted.\n");
+                clearDynamicArray();
+                current_dynamicArray = NULL;
+                printf("DynamicArray and all elements deleted.\n");
                 break;
 
             case 0:

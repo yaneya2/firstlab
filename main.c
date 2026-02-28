@@ -3,6 +3,6 @@
 //26 вариант
 
 int main(void) {
-    pointUI();
+    stringUI();
 }
 
