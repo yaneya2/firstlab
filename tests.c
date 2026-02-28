@@ -204,7 +204,6 @@ void test_deleteDynamicArray() {
 
     deleteDynamicArray(dynamicArray);
 
-    // No direct way to assert memory deallocation, but we ensure no crash occurs
     printf("PASS: deleteDynamicArray\n");
 }
 void test_edge_cases() {
@@ -212,18 +211,14 @@ void test_edge_cases() {
 
     const FieldInfo *stringFieldInfo = getStringFieldInfo();
 
-    // Test operations on NULL dynamicArray
     DynamicArray *nullDynamicArray = NULL;
     assert(get(nullDynamicArray, 0) == NULL && "get on NULL dynamicArray should return NULL");
 
-    // Create a valid dynamicArray for further tests
     DynamicArray *dynamicArray = createEmptyDynamicArray(stringFieldInfo);
 
-    // Test adding NULL element
-    add(dynamicArray, NULL);  // Should not add anything
+    add(dynamicArray, NULL);
     assert(dynamicArray->size == 0 && "Adding NULL element should not increase size");
 
-    // Test field_info NULL check in createEmptyDynamicArray
     DynamicArray *dynamicArrayFromNullField = createEmptyDynamicArray(NULL);
     assert(dynamicArrayFromNullField == NULL && "createEmptyDynamicArray with NULL field_info should return NULL");
 
@@ -234,12 +229,11 @@ void test_data_capacity_extension() {
     printf("--- Testing data_capacity extension ---\n");
 
     const FieldInfo *stringFieldInfo = getStringFieldInfo();
-    DynamicArray *dynamicArray = createDynamicArray(2, stringFieldInfo);  // Start with small data_capacity
+    DynamicArray *dynamicArray = createDynamicArray(2, stringFieldInfo);
 
-    // Add elements beyond initial data_capacity to trigger expansion
     char str1[] = "First";
     char str2[] = "Second";
-    char str3[] = "Third";  // This should trigger data_capacity expansion
+    char str3[] = "Third";
     char str4[] = "Fourth";
     char str5[] = "Fifth";
 
@@ -266,7 +260,6 @@ void test_data_capacity_extension() {
     assert(dynamicArray->data_capacity == 8 && "data_capacity should double to 8 after exceeding extended data_capacity");
     assert(dynamicArray->size == 5 && "Size should be 5 after adding fifth element");
 
-    // Verify all elements are accessible
     assert(strcmp((char*)get(dynamicArray, 0), "First") == 0 && "First element should be 'First'");
     assert(strcmp((char*)get(dynamicArray, 1), "Second") == 0 && "Second element should be 'Second'");
     assert(strcmp((char*)get(dynamicArray, 2), "Third") == 0 && "Third element should be 'Third'");
@@ -292,7 +285,6 @@ void test_double_operations() {
 
     assert(dynamicArray->size == 3 && "Size should be 3 after adding 3 doubles");
 
-    // Check values using proper comparison for doubles
     double *retrieved_val1 = (double*)get(dynamicArray, 0);
     double *retrieved_val2 = (double*)get(dynamicArray, 1);
     double *retrieved_val3 = (double*)get(dynamicArray, 2);
@@ -302,7 +294,6 @@ void test_double_operations() {
     assert(fabs(*retrieved_val3 - 1.41) < 1e-9 && "Third element should be 1.41");
 
 
-    // Test sort with doubles
     double val4 = 0.5;
     double val5 = 5.0;
     add(dynamicArray, &val4);
@@ -310,7 +301,6 @@ void test_double_operations() {
 
     sort(dynamicArray);
 
-    // After sorting: 0.5, 1.41, 3.14, 5.0, 9.99
     double *sortedVal0 = (double*)get(dynamicArray, 0);
     double *sortedVal1 = (double*)get(dynamicArray, 1);
     double *sortedVal2 = (double*)get(dynamicArray, 2);
@@ -332,15 +322,12 @@ void test_empty_dynamicArray_operations() {
     const FieldInfo *stringFieldInfo = getStringFieldInfo();
     DynamicArray *emptyDynamicArray = createEmptyDynamicArray(stringFieldInfo);
 
-    // Test get on empty dynamicArray
     assert(get(emptyDynamicArray, 0) == NULL && "get on empty dynamicArray should return NULL");
     assert(get(emptyDynamicArray, -1) == NULL && "get with negative index on empty dynamicArray should return NULL");
 
-    // Test operations on empty dynamicArray shouldn't crash
     map(emptyDynamicArray, toUpper);
     where(emptyDynamicArray, startsWithT);
-    
-    // Test sort on empty dynamicArray
+
     sort(emptyDynamicArray);
 
     deleteDynamicArray(emptyDynamicArray);
@@ -358,11 +345,9 @@ void test_index_boundary_conditions() {
     add(dynamicArray, str1);
     add(dynamicArray, str2);
 
-    // Test valid indices
     assert(get(dynamicArray, 0) != NULL && "Valid index 0 should return non-NULL");
     assert(get(dynamicArray, 1) != NULL && "Valid index 1 should return non-NULL");
 
-    // Test boundary invalid indices
     assert(get(dynamicArray, -1) == NULL && "Negative index should return NULL");
     assert(get(dynamicArray, 2) == NULL && "Index equal to size should return NULL");
     assert(get(dynamicArray, 100) == NULL && "Large out-of-bounds index should return NULL");
@@ -375,7 +360,6 @@ void test_concat_scenarios() {
 
     const FieldInfo *stringFieldInfo = getStringFieldInfo();
 
-    // Test concatenating two non-empty dynamicArrays
     DynamicArray *dynamicArray1 = createEmptyDynamicArray(stringFieldInfo);
     DynamicArray *dynamicArray2 = createEmptyDynamicArray(stringFieldInfo);
 
@@ -400,7 +384,6 @@ void test_concat_scenarios() {
 
     deleteDynamicArray(concatenated);
 
-    // Test concatenating with empty dynamicArray
     DynamicArray *emptyDynamicArray = createEmptyDynamicArray(stringFieldInfo);
     DynamicArray *concatWithEmpty = concat(dynamicArray1, emptyDynamicArray);
     assert(concatWithEmpty != NULL && "Concatenation with empty dynamicArray should succeed");
@@ -410,7 +393,6 @@ void test_concat_scenarios() {
 
     deleteDynamicArray(concatWithEmpty);
 
-    // Test concatenating empty with non-empty
     DynamicArray *emptyWithConcat = concat(emptyDynamicArray, dynamicArray1);
     assert(emptyWithConcat != NULL && "Concatenation of empty with non-empty should succeed");
     assert(emptyWithConcat->size == 2 && "Result should have same size as non-empty dynamicArray");

@@ -1,40 +1,35 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include "../headers/FieldInfo.h"
 #include "../headers/DynamicArray.h"
 #include  "../headers/UsersStruct.h"
-// Внешние переменные для хранения текущего списка и типа данных
+
 static DynamicArray *current_dynamicArray = NULL;
 
-// Функция для инициализации типов данных (предполагается, что они определены где-то в других файлах)
 extern const FieldInfo * getDoubleFieldInfo();
 extern const FieldInfo * getStringFieldInfo();
 extern const FieldInfo * getPointFieldInfo();
 
-// Функция для очистки списка
+
 void clearDynamicArray() {
     deleteDynamicArray(current_dynamicArray);
 }
-// Безопасное чтение целого числа с очисткой буфера
+
 int readInt(const char *prompt) {
     int value;
     while (1) {
         printf("%s", prompt);
         if (scanf("%d", &value) == 1) {
-            // Очищаем буфер до конца строки
             while (getchar() != '\n');
             return value;
         } else {
             printf("Invalid input. Please enter an integer.\n\n");
-            // Очищаем некорректный ввод
             while (getchar() != '\n');
         }
     }
 }
 
-// Безопасное чтение вещественного числа
 double readDouble(const char *prompt) {
     double value;
     while (1) {
@@ -48,28 +43,23 @@ double readDouble(const char *prompt) {
         }
     }
 }
-// Вспомогательные функции для проверки map и where
 
-// Проверочная функция для where для double (фильтр: положительные числа)
 bool positiveFilterFunction(const void *element) {
     double value = *(double*)element;
     return value > 0;
 }
 
-// Проверочная функция для map для double (преобразование: удвоение значения)
 void* doubleValueFunction(void *element) {
     double* original_value = (double*)element;
     *original_value *=2;
     return original_value;
 }
 
-// Проверочная функция для where для строк (фильтр: длина строки > 3)
 bool stringLengthFilterFunction(const void *element) {
     char *str = (char*)element;
     return str != NULL && strlen(str) > 3;
 }
 
-// Проверочная функция для map для строк (преобразование: в верхний регистр)
 void* toUppercaseFunction(void *element) {
     char *original_str = (char*)element;
     if(original_str == NULL) return NULL;
@@ -87,17 +77,14 @@ void* toUppercaseFunction(void *element) {
         upper_str[len] = '\0';
     }
     current_dynamicArray->field_info->deallocate(original_str);
-    // заменяем строку , если работать со старой, то можно вернуть ее же
     return upper_str;
 }
 
-// Проверочная функция для where для Point (фильтр: точки с положительными координатами)
 bool positivePointFilterFunction(const void *element) {
     Point *p = (Point*)element;
     return p != NULL && p->x > 0 && p->y > 0 && p->z > 0;
 }
 
-// Проверочная функция для map для Point (преобразование: увеличение координат на 1)
 void* incrementPointFunction(void *element) {
     Point *point = (Point*)element;
     point->x += 1;
