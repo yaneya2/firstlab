@@ -2,7 +2,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-DynamicArray * createDynamicArray(int data_capacity, const FieldInfo *field_info) {
+DynamicArray * createDynamicArray(const int data_capacity, const FieldInfo *field_info) {
     if (field_info == NULL || data_capacity <= 0) return NULL;
     DynamicArray *dynamicArray = (DynamicArray*)malloc(sizeof(DynamicArray));
     dynamicArray->data_capacity = data_capacity;
@@ -20,22 +20,26 @@ DynamicArray * createEmptyDynamicArray(const FieldInfo *field_info) {
     dynamicArray->data = malloc(dynamicArray->data_capacity * field_info->size);
     return dynamicArray;
 }
-void add(DynamicArray *dynamicArray,const void *ell) {
-    if (dynamicArray == NULL || ell == NULL) return;
+bool add(DynamicArray *dynamicArray,const void *ell) {
+    if (dynamicArray == NULL || ell == NULL) return false;
     if (dynamicArray->size == dynamicArray->data_capacity) {
+        void ** temp_data_ptr = realloc(dynamicArray->data, 2 * dynamicArray->data_capacity * dynamicArray->field_info->size);
+        if (temp_data_ptr == NULL) {
+            return false;
+        }
+        dynamicArray->data = temp_data_ptr;
         dynamicArray->data_capacity *= 2;
-        dynamicArray->data = realloc(dynamicArray->data, dynamicArray->data_capacity * dynamicArray->field_info->size);
     }
     dynamicArray->data[dynamicArray->size] = dynamicArray->field_info->allocate();
     dynamicArray->field_info->assign(dynamicArray->data[dynamicArray->size], ell);
     dynamicArray->size++;
-
+    return true;
 }
-void * get(const DynamicArray *dynamicArray, int index) {
+void * get(const DynamicArray *dynamicArray, const int index) {
     if (dynamicArray == NULL || index < 0 || index >= dynamicArray->size) return NULL;
     return dynamicArray->data[index];
 }
-void map(DynamicArray *dynamicArray, void *(*function)(void *)) {
+void map(const DynamicArray * dynamicArray, void *(*function)(void *)) {
     for (int i = 0; i < dynamicArray->size; ++i) {
         dynamicArray->data[i] = function(dynamicArray->data[i]);
     }
@@ -65,7 +69,7 @@ DynamicArray * concat(const DynamicArray *dynamicArray1, const DynamicArray *dyn
     }
     return dynamicArray;
 }
-void sort(DynamicArray *dynamicArray) {
+void sort(const DynamicArray *dynamicArray) {
     if (dynamicArray == NULL || dynamicArray->size == 0) return;
     int minIndex = 0;
     void *t = 0;

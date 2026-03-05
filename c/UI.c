@@ -4,6 +4,7 @@
 #include "../headers/FieldInfo.h"
 #include "../headers/DynamicArray.h"
 #include  "../headers/UsersStruct.h"
+#include "../headers/UI.h"
 
 static DynamicArray *current_dynamicArray = NULL;
 
@@ -12,56 +13,54 @@ extern const FieldInfo * getStringFieldInfo();
 extern const FieldInfo * getPointFieldInfo();
 
 
-void clearDynamicArray() {
+static void clearDynamicArray() {
     deleteDynamicArray(current_dynamicArray);
 }
 
-int readInt(const char *prompt) {
-    int value;
+static int readInt(const char *prompt) {
+    int value = 0;
     while (1) {
         printf("%s", prompt);
         if (scanf("%d", &value) == 1) {
-            while (getchar() != '\n');
+            while (getchar() != '\n') {}
             return value;
-        } else {
-            printf("Invalid input. Please enter an integer.\n\n");
-            while (getchar() != '\n');
         }
+        printf("Invalid input. Please enter an integer.\n\n");
+        while (getchar() != '\n');
     }
 }
 
-double readDouble(const char *prompt) {
+static double readDouble(const char *prompt) {
     double value;
     while (1) {
         printf("%s", prompt);
         if (scanf("%lf", &value) == 1) {
-            while (getchar() != '\n');
+            while (getchar() != '\n') {}
             return value;
-        } else {
-            printf("Invalid input. Please enter a real number.\n\n");
-            while (getchar() != '\n');
         }
+        printf("Invalid input. Please enter a real number.\n\n");
+        while (getchar() != '\n');
     }
 }
 
-bool positiveFilterFunction(const void *element) {
-    double value = *(double*)element;
+static bool positiveFilterFunction(const void *element) {
+    double value = *(double *)element;
     return value > 0;
 }
 
-void* doubleValueFunction(void *element) {
-    double* original_value = (double*)element;
+static void * doubleValueFunction(void *element) {
+    double *original_value = (double *)element;
     *original_value *=2;
     return original_value;
 }
 
-bool stringLengthFilterFunction(const void *element) {
-    char *str = (char*)element;
+static bool stringLengthFilterFunction(const void *element) {
+    char *str = (char *)element;
     return str != NULL && strlen(str) > 3;
 }
 
-void* toUppercaseFunction(void *element) {
-    char *original_str = (char*)element;
+static void * toUppercaseFunction(void *element) {
+    char *original_str = (char *)element;
     if(original_str == NULL) return NULL;
     
     int len = strlen(original_str);
@@ -80,13 +79,13 @@ void* toUppercaseFunction(void *element) {
     return upper_str;
 }
 
-bool positivePointFilterFunction(const void *element) {
-    Point *p = (Point*)element;
+static bool positivePointFilterFunction(const void *element) {
+    Point *p = (Point *)element;
     return p != NULL && p->x > 0 && p->y > 0 && p->z > 0;
 }
 
-void* incrementPointFunction(void *element) {
-    Point *point = (Point*)element;
+static void * incrementPointFunction(void *element) {
+    Point *point = (Point *)element;
     point->x += 1;
     point->y += 1;
     point->z += 1;
@@ -94,7 +93,7 @@ void* incrementPointFunction(void *element) {
 }
 
 void doubleUI() {
-    int choice;
+    int choice = 0;
     double value;
     int index;
 
@@ -140,7 +139,7 @@ void doubleUI() {
                 }
                 index = readInt("Enter index to get element: ");
                 if (index >= 0 && index < current_dynamicArray->size) {
-                    double* element = (double*)get(current_dynamicArray, index);
+                    double *element = (double *)get(current_dynamicArray, index);
                     if (element != NULL) {
                         printf("Element at index %d: %f\n", index, *element);
                     } else {
@@ -166,7 +165,7 @@ void doubleUI() {
                     break;
                 }
                 {
-                    DynamicArray* temp = concat(current_dynamicArray, current_dynamicArray);
+                    DynamicArray *temp = concat(current_dynamicArray, current_dynamicArray);
                     if (temp != NULL) {
                         deleteDynamicArray(current_dynamicArray);
                         current_dynamicArray = temp;
@@ -202,7 +201,7 @@ void doubleUI() {
                 }
                 printf("DynamicArray elements: ");
                 for (int i = 0; i < current_dynamicArray->size; i++) {
-                    double *element = (double*)get(current_dynamicArray, i);
+                    double *element = (double *)get(current_dynamicArray, i);
                     if (element != NULL) {
                         printf("%.2f ", *element);
                     }
@@ -231,7 +230,7 @@ void doubleUI() {
 }
 
 void pointUI() {
-    int choice;
+    int choice = 0;
     Point value;
     int index;
 
@@ -279,7 +278,7 @@ void pointUI() {
                 }
                 index = readInt("Enter index to get element: ");
                 if (index >= 0 && index < current_dynamicArray->size) {
-                    Point* element = (Point*)get(current_dynamicArray, index);
+                    Point *element = (Point *)get(current_dynamicArray, index);
                     if (element != NULL) {
                         printf("Element at index %d: (%.2f, %.2f, %.2f)\n", index, element->x, element->y, element->z);
                     } else {
@@ -305,7 +304,7 @@ void pointUI() {
                     break;
                 }
                 {
-                    DynamicArray* temp = concat(current_dynamicArray, current_dynamicArray);
+                    DynamicArray *temp = concat(current_dynamicArray, current_dynamicArray);
                     if (temp != NULL) {
                         deleteDynamicArray(current_dynamicArray);
                         current_dynamicArray = temp;
@@ -341,7 +340,7 @@ void pointUI() {
                 }
                 printf("DynamicArray elements: ");
                 for (int i = 0; i < current_dynamicArray->size; i++) {
-                    Point *element = (Point*)get(current_dynamicArray, i);
+                    Point *element = (Point *)get(current_dynamicArray, i);
                     if (element != NULL) {
                         printf("(%.2f, %.2f, %.2f) ", element->x, element->y, element->z);
                     }
@@ -370,7 +369,7 @@ void pointUI() {
 }
 
 void stringUI() {
-    int choice;
+    int choice = 0;
     char buffer[256];
     int index;
 
@@ -418,7 +417,7 @@ void stringUI() {
                 }
                 index = readInt("Enter index to get element: ");
                 if (index >= 0 && index < current_dynamicArray->size) {
-                    char *element = (char*)get(current_dynamicArray, index);
+                    char *element = (char *)get(current_dynamicArray, index);
                     if (element != NULL) {
                         printf("Element at index %d: %s\n", index, element);
                     } else {
@@ -476,7 +475,7 @@ void stringUI() {
                 }
                 printf("DynamicArray elements: [");
                 for (int i = 0; i < current_dynamicArray->size; i++) {
-                    char *element = (char*)get(current_dynamicArray, i);
+                    char *element = (char *)get(current_dynamicArray, i);
                     if (element != NULL) {
                         printf("\"%s\"", element);
                         if (i < current_dynamicArray->size - 1) printf(", ");

@@ -7,9 +7,11 @@ add_executable(firstlab main.c
         headers/DynamicArray.h
         c/DynamicArray.c
         c/FieldInfo.c
+        c/UI.c
         headers/FieldInfo.h
         headers/Allocator.h
-        headers/UsersStruct.h)
+        headers/UsersStruct.h
+        headers/UI.h)
 enable_testing()
 add_executable(tests tests.c
         headers/DynamicArray.h

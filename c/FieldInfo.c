@@ -48,13 +48,13 @@ static void doubleDeallocate(void *ptr) {
 static void pointDeallocate(void *ptr) {
     free(ptr);
 }
-static void doubleAssign(void *res, void *arg) {
+static void doubleAssign(void *res, const void *arg) {
     memcpy(res, arg, sizeof(double));
 }
-static void stringAssign(void *res, void *arg) {
+static void stringAssign(void *res, const void *arg) {
     memcpy(res, arg, STRING_SIZE);
 }
-static void pointAssign(void *res, void *arg) {
+static void pointAssign(void *res, const void *arg) {
     memcpy(res, arg, sizeof(Point));
 }
 const FieldInfo * getDoubleFieldInfo() {

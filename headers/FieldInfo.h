@@ -4,9 +4,8 @@
 #include <stdbool.h>
 #include "Allocator.h"
 
-typedef void (*UnaryOperator)(void *, void *);
+typedef void (*UnaryOperator)(void *,const void *);
 typedef bool (*BooleanOperator)(const void *, const void *);
-typedef char * (*StringOperator)(const void *);
 
 typedef struct {
     int size;
