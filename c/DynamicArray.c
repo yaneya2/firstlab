@@ -30,18 +30,17 @@ bool add(DynamicArray *dynamicArray,const void *ell) {
         dynamicArray->data = temp_data_ptr;
         dynamicArray->data_capacity *= 2;
     }
-    dynamicArray->data[dynamicArray->size] = dynamicArray->field_info->allocate();
-    dynamicArray->field_info->assign(dynamicArray->data[dynamicArray->size], ell);
+    dynamicArray->field_info->assign(dynamicArray->data + dynamicArray->size * dynamicArray->field_info->size, ell);
     dynamicArray->size++;
     return true;
 }
 void * get(const DynamicArray *dynamicArray, const int index) {
     if (dynamicArray == NULL || index < 0 || index >= dynamicArray->size) return NULL;
-    return dynamicArray->data[index];
+    return dynamicArray->data + index * dynamicArray->field_info->size;
 }
 void map(const DynamicArray * dynamicArray, void *(*function)(void *)) {
     for (int i = 0; i < dynamicArray->size; ++i) {
-        dynamicArray->data[i] = function(dynamicArray->data[i]);
+        dynamicArray->field_info->assign(get(dynamicArray, i), function(get(dynamicArray, i)));
     }
 }
 void where(DynamicArray *dynamicArray, bool (*function)(const void *)) {
@@ -49,7 +48,7 @@ void where(DynamicArray *dynamicArray, bool (*function)(const void *)) {
         if (!function(get(dynamicArray, i))) {
             dynamicArray->field_info->deallocate(get(dynamicArray, i));
             for (int j = i; j < dynamicArray->size - 1; ++j) {
-                dynamicArray->data[j] = dynamicArray->data[j + 1];
+                dynamicArray->field_info->assign(get(dynamicArray, j ), get(dynamicArray, j + 1));
             }
             dynamicArray->field_info->deallocate(get(dynamicArray, dynamicArray->size));
             dynamicArray->size--;
@@ -72,7 +71,7 @@ DynamicArray * concat(const DynamicArray *dynamicArray1, const DynamicArray *dyn
 void sort(const DynamicArray *dynamicArray) {
     if (dynamicArray == NULL || dynamicArray->size == 0) return;
     int minIndex = 0;
-    void *t = 0;
+    void *t = malloc(dynamicArray->field_info->size);
     for (int i = 0; i < dynamicArray->size - 1; i++) {
         minIndex = i;
         for (int j = i + 1; j < dynamicArray->size; j++) {
@@ -80,10 +79,11 @@ void sort(const DynamicArray *dynamicArray) {
                 minIndex = j;
             }
         }
-        t = get(dynamicArray, i);
-        dynamicArray->data[i] = get(dynamicArray, minIndex);
-        dynamicArray->data[minIndex] = t;
+        dynamicArray->field_info->assign(t, get(dynamicArray, i));
+        dynamicArray->field_info->assign(get(dynamicArray, i), get(dynamicArray, minIndex));
+        dynamicArray->field_info->assign(get(dynamicArray, minIndex), t);
     }
+    free(t);
 }
 void deleteDynamicArray(DynamicArray *dynamicArray) {
     if (dynamicArray == NULL) return;

@@ -39,15 +39,9 @@ static void * stringAllocate() {
 static void * pointAllocate() {
     return malloc(sizeof(Point));
 }
-static void stringDeallocate(void *ptr) {
-    free(ptr);
-}
-static void doubleDeallocate(void *ptr) {
-    free(ptr);
-}
-static void pointDeallocate(void *ptr) {
-    free(ptr);
-}
+static void stringDeallocate(void *ptr) {}
+static void doubleDeallocate(void *ptr) {}
+static void pointDeallocate(void *ptr) {}
 static void doubleAssign(void *res, const void *arg) {
     memcpy(res, arg, sizeof(double));
 }
@@ -60,7 +54,7 @@ static void pointAssign(void *res, const void *arg) {
 const FieldInfo * getDoubleFieldInfo() {
     if (DOUBLE_FIELD_INFO == NULL) {
         DOUBLE_FIELD_INFO = (FieldInfo *)malloc(sizeof(FieldInfo));
-        DOUBLE_FIELD_INFO->size = sizeof(double *);
+        DOUBLE_FIELD_INFO->size = sizeof(double);
         DOUBLE_FIELD_INFO->name = "double";
         DOUBLE_FIELD_INFO->compare = doubleCompare;
         DOUBLE_FIELD_INFO->allocate = doubleAllocate;
@@ -72,7 +66,7 @@ const FieldInfo * getDoubleFieldInfo() {
 const FieldInfo * getStringFieldInfo() {
     if (STRING_FIELD_INFO == NULL) {
         STRING_FIELD_INFO = (FieldInfo *)malloc(sizeof(FieldInfo));
-        STRING_FIELD_INFO->size = sizeof(char *);
+        STRING_FIELD_INFO->size = STRING_SIZE;
         STRING_FIELD_INFO->name = "string";
         STRING_FIELD_INFO->compare = stringCompare;
         STRING_FIELD_INFO->allocate = stringAllocate;
@@ -84,7 +78,7 @@ const FieldInfo * getStringFieldInfo() {
 const FieldInfo * getPointFieldInfo() {
     if (POINT_FIELD_INFO == NULL) {
         POINT_FIELD_INFO = (FieldInfo *)malloc(sizeof(FieldInfo));
-        POINT_FIELD_INFO->size = sizeof(Point *);
+        POINT_FIELD_INFO->size = sizeof(Point);
         POINT_FIELD_INFO->name = "point";
         POINT_FIELD_INFO->compare = PointCompare;
         POINT_FIELD_INFO->allocate = pointAllocate;

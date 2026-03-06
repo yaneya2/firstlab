@@ -9,7 +9,7 @@ typedef struct {
     int data_capacity;
     int size;
     const FieldInfo *field_info;
-    void **data;
+    void *data;
 }DynamicArray;
 
 DynamicArray * createDynamicArray(int data_capacity, const FieldInfo * field_info);
