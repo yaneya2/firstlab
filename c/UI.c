@@ -48,10 +48,9 @@ static bool positiveFilterFunction(const void *element) {
     return value > 0;
 }
 
-static void * doubleValueFunction(void *element) {
-    double *original_value = (double *)element;
-    *original_value *=2;
-    return original_value;
+static void doubleValueFunction(void *element) {
+    double *value = (double *)element;
+    *value *=2;
 }
 
 static bool stringLengthFilterFunction(const void *element) {
@@ -59,10 +58,10 @@ static bool stringLengthFilterFunction(const void *element) {
     return str != NULL && strlen(str) > 3;
 }
 
-static void * toUppercaseFunction(void *element) {
+static void toUppercaseFunction(void *element) {
     char *original_str = (char *)element;
-    if(original_str == NULL) return NULL;
-    
+    if(original_str == NULL) return;
+
     int len = strlen(original_str);
     char *upper_str = malloc((len + 1) * sizeof(char));
     if(upper_str != NULL) {
@@ -75,8 +74,8 @@ static void * toUppercaseFunction(void *element) {
         }
         upper_str[len] = '\0';
     }
-    current_dynamicArray->field_info->deallocate(original_str);
-    return upper_str;
+    memcpy(element, upper_str, current_dynamicArray->field_info->size);
+    free(upper_str);
 }
 
 static bool positivePointFilterFunction(const void *element) {
@@ -84,12 +83,11 @@ static bool positivePointFilterFunction(const void *element) {
     return p != NULL && p->x > 0 && p->y > 0 && p->z > 0;
 }
 
-static void * incrementPointFunction(void *element) {
+static void incrementPointFunction(void *element) {
     Point *point = (Point *)element;
     point->x += 1;
     point->y += 1;
     point->z += 1;
-    return point;
 }
 
 void doubleUI() {

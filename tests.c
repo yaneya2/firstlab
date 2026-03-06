@@ -70,15 +70,24 @@ void test_get_out_of_bounds() {
     deleteDynamicArray(dynamicArray);
     printf("PASS: get out of bounds\n");
 }
-void *toUpper(void *element) {
-    char *str = (char*)element;
-    int len = strlen(str);
-    char *upper = (char*)malloc(len + 1);
-    for (int i = 0; i < len; i++) {
-        upper[i] = toupper(str[i]);
+static void toUppercaseFunction(void *element) {
+    char *original_str = (char *)element;
+    if(original_str == NULL) return;
+
+    int len = strlen(original_str);
+    char *upper_str = malloc((len + 1) * sizeof(char));
+    if(upper_str != NULL) {
+        for(int i = 0; i <= len; i++) {
+            if(original_str[i] >= 'a' && original_str[i] <= 'z') {
+                upper_str[i] = original_str[i] - 'a' + 'A';
+            } else {
+                upper_str[i] = original_str[i];
+            }
+        }
+        upper_str[len] = '\0';
     }
-    upper[len] = '\0';
-    return upper;
+    memcpy(element, upper_str, 50);
+    free(upper_str);
 }
 void test_map() {
     printf("--- Testing map ---\n");
@@ -92,7 +101,7 @@ void test_map() {
     add(dynamicArray, str1);
     add(dynamicArray, str2);
 
-    map(dynamicArray, toUpper);
+    map(dynamicArray, toUppercaseFunction);
 
     assert(strcmp((char*)get(dynamicArray, 0), "HELLO") == 0 && "After map: First element should be 'HELLO'");
     assert(strcmp((char*)get(dynamicArray, 1), "WORLD") == 0 && "After map: Second element should be 'WORLD'");
@@ -325,7 +334,7 @@ void test_empty_dynamicArray_operations() {
     assert(get(emptyDynamicArray, 0) == NULL && "get on empty dynamicArray should return NULL");
     assert(get(emptyDynamicArray, -1) == NULL && "get with negative index on empty dynamicArray should return NULL");
 
-    map(emptyDynamicArray, toUpper);
+    map(emptyDynamicArray, toUppercaseFunction);
     where(emptyDynamicArray, startsWithT);
 
     sort(emptyDynamicArray);

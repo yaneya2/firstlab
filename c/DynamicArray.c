@@ -38,9 +38,9 @@ void * get(const DynamicArray *dynamicArray, const int index) {
     if (dynamicArray == NULL || index < 0 || index >= dynamicArray->size) return NULL;
     return dynamicArray->data + index * dynamicArray->field_info->size;
 }
-void map(const DynamicArray * dynamicArray, void *(*function)(void *)) {
+void map(const DynamicArray * dynamicArray, void (*function)(void *)) {
     for (int i = 0; i < dynamicArray->size; ++i) {
-        dynamicArray->field_info->assign(get(dynamicArray, i), function(get(dynamicArray, i)));
+        function(get(dynamicArray, i));
     }
 }
 void where(DynamicArray *dynamicArray, bool (*function)(const void *)) {

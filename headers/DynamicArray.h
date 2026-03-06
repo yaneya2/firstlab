@@ -16,7 +16,7 @@ DynamicArray * createDynamicArray(int data_capacity, const FieldInfo * field_inf
 DynamicArray * createEmptyDynamicArray(const FieldInfo *field_info);
 bool add(DynamicArray *dynamicArray,const void *ell);
 void * get(const DynamicArray *dynamicArray, int index);
-void map(const DynamicArray *dynamicArray, void * (*function)(void *));
+void map(const DynamicArray *dynamicArray, void (*function)(void *));
 void where(DynamicArray *dynamicArray, bool (*function)(const void *));
 DynamicArray * concat(const DynamicArray *dynamicArray1, const DynamicArray *dynamicArray2);
 void sort(const DynamicArray *dynamicArray);
