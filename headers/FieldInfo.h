@@ -4,8 +4,9 @@
 #include <stdbool.h>
 #include "Allocator.h"
 
-typedef void (*UnaryOperator)(void *,const void *);
-typedef bool (*BooleanOperator)(const void *, const void *);
+typedef bool (*UnaryOperator)(void *,const void *);
+typedef int (*CompareOperator)(const void *, const void *);
+
 
 typedef struct {
     int size;
@@ -13,7 +14,7 @@ typedef struct {
     UnaryOperator assign;
     Allocator allocate;
     Deallocator deallocate;
-    BooleanOperator compare;
+    CompareOperator compare;
 } FieldInfo;
 
 const FieldInfo *getDoubleFieldInfo();
