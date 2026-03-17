@@ -1,27 +1,37 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
+#include <errno.h>
+
 #include "../headers/FieldInfo.h"
 #include "../headers/DynamicArray.h"
-#include  "../headers/UsersStruct.h"
+#include "../headers/UsersStruct.h"
 #include "../headers/UI.h"
 
-static DynamicArray *current_dynamicArray = NULL;
+static DynamicArray *current_dynamic_array = NULL;
 
-extern const FieldInfo * getDoubleFieldInfo();
-extern const FieldInfo * getStringFieldInfo();
-extern const FieldInfo * getPointFieldInfo();
+extern const FieldInfo *get_double_field_info(void);
+extern const FieldInfo *get_string_field_info(void);
+extern const FieldInfo *get_point_field_info(void);
 
-
-static void clearDynamicArray() {
-    deleteDynamicArray(current_dynamicArray);
+static void clear_dynamic_array(void) {
+    if (current_dynamic_array != NULL) {
+        if (!destroy_dynamic_array(current_dynamic_array)) {
+            fprintf(stderr, "Warning: Failed to destroy dynamic array (errno: %d)\n", errno);
+        }
+        current_dynamic_array = NULL;
+    }
 }
 
-static int readInt(const char *prompt) {
+static int read_int(const char *prompt) {
     int value = 0;
+    int result;
+
     while (1) {
         printf("%s", prompt);
-        if (scanf("%d", &value) == 1) {
+        result = scanf("%d", &value);
+        if (result == 1) {
             while (getchar() != '\n') {}
             return value;
         }
@@ -30,11 +40,14 @@ static int readInt(const char *prompt) {
     }
 }
 
-static double readDouble(const char *prompt) {
-    double value;
+static double read_double(const char *prompt) {
+    double value = 0.0;
+    int result;
+
     while (1) {
         printf("%s", prompt);
-        if (scanf("%lf", &value) == 1) {
+        result = scanf("%lf", &value);
+        if (result == 1) {
             while (getchar() != '\n') {}
             return value;
         }
@@ -43,59 +56,127 @@ static double readDouble(const char *prompt) {
     }
 }
 
-static bool positiveFilterFunction(const void *element) {
+static bool positive_filter_function(const void *element) {
     double value = *(double *)element;
     return value > 0;
 }
 
-static void doubleValueFunction(void *element) {
+static void *double_value_function(void *element) {
     double *value = (double *)element;
-    *value *=2;
+    double *new_value = (double *)malloc(sizeof(double));
+    if (new_value == NULL) {
+        errno = ENOMEM;
+        return NULL;
+    }
+    *new_value = *value * 2;
+    return new_value;
 }
 
-static bool stringLengthFilterFunction(const void *element) {
+static bool string_length_filter_function(const void *element) {
     char *str = (char *)element;
     return str != NULL && strlen(str) > 3;
 }
 
-static void toUppercaseFunction(void *element) {
+static void *to_uppercase_function(void *element) {
     char *original_str = (char *)element;
-    if(original_str == NULL) return;
-
-    int len = strlen(original_str);
-    char *upper_str = malloc((len + 1) * sizeof(char));
-    if(upper_str != NULL) {
-        for(int i = 0; i <= len; i++) {
-            if(original_str[i] >= 'a' && original_str[i] <= 'z') {
-                upper_str[i] = original_str[i] - 'a' + 'A';
-            } else {
-                upper_str[i] = original_str[i];
-            }
-        }
-        upper_str[len] = '\0';
+    if (original_str == NULL) {
+        errno = EINVAL;
+        return NULL;
     }
-    memcpy(element, upper_str, current_dynamicArray->field_info->size);
-    free(upper_str);
+
+    size_t len = strlen(original_str);
+    char *upper_str = malloc((len + 1) * sizeof(char));
+    if (upper_str == NULL) {
+        errno = ENOMEM;
+        return NULL;
+    }
+
+    for (size_t i = 0; i <= len; i++) {
+        if (original_str[i] >= 'a' && original_str[i] <= 'z') {
+            upper_str[i] = original_str[i] - 'a' + 'A';
+        } else {
+            upper_str[i] = original_str[i];
+        }
+    }
+    upper_str[len] = '\0';
+    return upper_str;
 }
 
-static bool positivePointFilterFunction(const void *element) {
+static bool positive_point_filter_function(const void *element) {
     Point *p = (Point *)element;
     return p != NULL && p->x > 0 && p->y > 0 && p->z > 0;
 }
 
-static void incrementPointFunction(void *element) {
+static void *increment_point_function(void *element) {
     Point *point = (Point *)element;
-    point->x += 1;
-    point->y += 1;
-    point->z += 1;
+    Point *new_point = (Point *)malloc(sizeof(Point));
+    if (new_point == NULL) {
+        errno = ENOMEM;
+        return NULL;
+    }
+    new_point->x = point->x + 1;
+    new_point->y = point->y + 1;
+    new_point->z = point->z + 1;
+    return new_point;
 }
 
-void doubleUI() {
+static void print_double_array(void) {
+    if (current_dynamic_array == NULL) {
+        printf("Error: No dynamic array created.\n");
+        return;
+    }
+
+    printf("Dynamic array elements: ");
+    for (size_t i = 0; i < current_dynamic_array->size; i++) {
+        double *element = (double *)get(current_dynamic_array, i);
+        if (element != NULL) {
+            printf("%.2f ", *element);
+        }
+    }
+    printf("\n");
+}
+
+static void print_point_array(void) {
+    if (current_dynamic_array == NULL) {
+        printf("Error: No dynamic array created.\n");
+        return;
+    }
+
+    printf("Dynamic array elements: ");
+    for (size_t i = 0; i < current_dynamic_array->size; i++) {
+        Point *element = (Point *)get(current_dynamic_array, i);
+        if (element != NULL) {
+            printf("(%.2f, %.2f, %.2f) ", element->x, element->y, element->z);
+        }
+    }
+    printf("\n");
+}
+
+static void print_string_array(void) {
+    if (current_dynamic_array == NULL) {
+        printf("Error: No dynamic array created.\n");
+        return;
+    }
+
+    printf("Dynamic array elements: [");
+    for (size_t i = 0; i < current_dynamic_array->size; i++) {
+        char *element = (char *)get(current_dynamic_array, i);
+        if (element != NULL) {
+            printf("\"%s\"", element);
+            if (i < current_dynamic_array->size - 1) {
+                printf(", ");
+            }
+        }
+    }
+    printf("]\n");
+}
+
+void double_ui(void) {
     int choice = 0;
     double value;
     int index;
 
-    while(1) {
+    while (1) {
         printf("\n=== Double DynamicArray Menu ===\n");
         printf("1. Create dynamicArray\n");
         printf("2. Add element\n");
@@ -108,115 +189,136 @@ void doubleUI() {
         printf("9. Delete dynamicArray and all elements\n");
         printf("0. Exit\n");
 
-        choice = readInt("Enter your choice: ");
+        choice = read_int("Enter your choice: ");
 
-        switch(choice) {
+        switch (choice) {
             case 1:
-                if (current_dynamicArray != NULL) {
+                if (current_dynamic_array != NULL) {
                     printf("Warning: Current dynamicArray will be deleted. ");
-                    clearDynamicArray();
+                    clear_dynamic_array();
                 }
-                current_dynamicArray = createEmptyDynamicArray(getDoubleFieldInfo());
-                printf("Double dynamicArray created successfully.\n");
+                current_dynamic_array = create_empty_dynamic_array(get_double_field_info());
+                if (current_dynamic_array == NULL) {
+                    printf("Error: Failed to create dynamicArray (errno: %d)\n", errno);
+                } else {
+                    printf("Double dynamicArray created successfully.\n");
+                }
                 break;
 
             case 2:
-                if (current_dynamicArray == NULL) {
+                if (current_dynamic_array == NULL) {
                     printf("Error: No dynamicArray created. Create a dynamicArray first.\n");
                     break;
                 }
-                value = readDouble("Enter double value to add: ");
-                add(current_dynamicArray, &value);
-                printf("Element added successfully.\n");
+                value = read_double("Enter double value to add: ");
+                if (!add(current_dynamic_array, &value)) {
+                    printf("Error: Failed to add element (errno: %d)\n", errno);
+                } else {
+                    printf("Element added successfully.\n");
+                }
                 break;
 
             case 3:
-                if (current_dynamicArray == NULL) {
+                if (current_dynamic_array == NULL) {
                     printf("Error: No dynamicArray created.\n");
                     break;
                 }
-                index = readInt("Enter index to get element: ");
-                if (index >= 0 && index < current_dynamicArray->size) {
-                    double *element = (double *)get(current_dynamicArray, index);
+                index = read_int("Enter index to get element: ");
+                if (index >= 0 && index < (int)current_dynamic_array->size) {
+                    double *element = (double *)get(current_dynamic_array, index);
                     if (element != NULL) {
                         printf("Element at index %d: %f\n", index, *element);
                     } else {
-                        printf("Error getting element.\n");
+                        printf("Error getting element (errno: %d)\n", errno);
                     }
                 } else {
-                    printf("Invalid index. Please enter a number between 0 and %d.\n", current_dynamicArray->size - 1);
+                    printf("Invalid index. Please enter a number between 0 and %zu.\n",
+                           current_dynamic_array->size - 1);
                 }
                 break;
 
             case 4:
-                if (current_dynamicArray == NULL) {
+                if (current_dynamic_array == NULL) {
                     printf("Error: No dynamicArray created.\n");
                     break;
                 }
-                sort(current_dynamicArray);
-                printf("DynamicArray sorted successfully.\n");
+                if (!sort(current_dynamic_array)) {
+                    printf("Error: Failed to sort dynamicArray (errno: %d)\n", errno);
+                } else {
+                    printf("DynamicArray sorted successfully.\n");
+                }
                 break;
 
             case 5:
-                if (current_dynamicArray == NULL) {
+                if (current_dynamic_array == NULL) {
                     printf("Error: No dynamicArray created.\n");
                     break;
                 }
                 {
-                    DynamicArray *temp = concat(current_dynamicArray, current_dynamicArray);
+                    DynamicArray *temp = concat(current_dynamic_array, current_dynamic_array);
                     if (temp != NULL) {
-                        deleteDynamicArray(current_dynamicArray);
-                        current_dynamicArray = temp;
+                        if (!destroy_dynamic_array(current_dynamic_array)) {
+                            fprintf(stderr, "Warning: Failed to destroy old array (errno: %d)\n", errno);
+                        }
+                        current_dynamic_array = temp;
                         printf("DynamicArray concatenated with itself successfully.\n");
                     } else {
-                        printf("Error concatenating dynamicArrays.\n");
+                        printf("Error concatenating dynamicArrays (errno: %d)\n", errno);
                     }
                 }
                 break;
 
             case 6:
-                if (current_dynamicArray == NULL) {
+                if (current_dynamic_array == NULL) {
                     printf("Error: No dynamicArray created.\n");
                     break;
                 }
                 printf("Applying where filter (positive numbers only)\n");
-                where(current_dynamicArray, positiveFilterFunction);
+                {
+                    DynamicArray *filtered = where(current_dynamic_array, positive_filter_function);
+                    if (filtered != NULL) {
+                        if (!destroy_dynamic_array(current_dynamic_array)) {
+                            fprintf(stderr, "Warning: Failed to destroy old array (errno: %d)\n", errno);
+                        }
+                        current_dynamic_array = filtered;
+                        printf("Where filter applied successfully.\n");
+                    } else {
+                        printf("Error applying where filter (errno: %d)\n", errno);
+                    }
+                }
                 break;
 
             case 7:
-                if (current_dynamicArray == NULL) {
+                if (current_dynamic_array == NULL) {
                     printf("Error: No dynamicArray created.\n");
                     break;
                 }
                 printf("Applying map (doubling values)\n");
-                map(current_dynamicArray, doubleValueFunction);
+                {
+                    DynamicArray *mapped = map(current_dynamic_array, double_value_function);
+                    if (mapped != NULL) {
+                        if (!destroy_dynamic_array(current_dynamic_array)) {
+                            fprintf(stderr, "Warning: Failed to destroy old array (errno: %d)\n", errno);
+                        }
+                        current_dynamic_array = mapped;
+                        printf("Map applied successfully.\n");
+                    } else {
+                        printf("Error applying map (errno: %d)\n", errno);
+                    }
+                }
                 break;
 
             case 8:
-                if (current_dynamicArray == NULL) {
-                    printf("Error: No dynamicArray created.\n");
-                    break;
-                }
-                printf("DynamicArray elements: ");
-                for (int i = 0; i < current_dynamicArray->size; i++) {
-                    double *element = (double *)get(current_dynamicArray, i);
-                    if (element != NULL) {
-                        printf("%.2f ", *element);
-                    }
-                }
-                printf("\n");
+                print_double_array();
                 break;
 
             case 9:
-                clearDynamicArray();
-                current_dynamicArray = NULL;
+                clear_dynamic_array();
                 printf("DynamicArray and all elements deleted.\n");
                 break;
 
             case 0:
-                if (current_dynamicArray != NULL) {
-                    clearDynamicArray();
-                }
+                clear_dynamic_array();
                 printf("Exiting double UI...\n");
                 return;
 
@@ -227,12 +329,12 @@ void doubleUI() {
     }
 }
 
-void pointUI() {
+void point_ui(void) {
     int choice = 0;
     Point value;
     int index;
 
-    while(1) {
+    while (1) {
         printf("\n=== Point DynamicArray Menu ===\n");
         printf("1. Create dynamicArray\n");
         printf("2. Add element\n");
@@ -245,117 +347,139 @@ void pointUI() {
         printf("9. Delete dynamicArray and all elements\n");
         printf("0. Exit\n");
 
-        choice = readInt("Enter your choice: ");
+        choice = read_int("Enter your choice: ");
 
-        switch(choice) {
+        switch (choice) {
             case 1:
-                if (current_dynamicArray != NULL) {
+                if (current_dynamic_array != NULL) {
                     printf("Warning: Current dynamicArray will be deleted. ");
-                    clearDynamicArray();
+                    clear_dynamic_array();
                 }
-                current_dynamicArray = createEmptyDynamicArray(getPointFieldInfo());
-                printf("Point dynamicArray created successfully.\n");
+                current_dynamic_array = create_empty_dynamic_array(get_point_field_info());
+                if (current_dynamic_array == NULL) {
+                    printf("Error: Failed to create dynamicArray (errno: %d)\n", errno);
+                } else {
+                    printf("Point dynamicArray created successfully.\n");
+                }
                 break;
 
             case 2:
-                if (current_dynamicArray == NULL) {
+                if (current_dynamic_array == NULL) {
                     printf("Error: No dynamicArray created. Create a dynamicArray first.\n");
                     break;
                 }
-                value.x = readDouble("Enter x coordinate: ");
-                value.y = readDouble("Enter y coordinate: ");
-                value.z = readDouble("Enter z coordinate: ");
-                add(current_dynamicArray, &value);
-                printf("Element added successfully.\n");
+                value.x = read_double("Enter x coordinate: ");
+                value.y = read_double("Enter y coordinate: ");
+                value.z = read_double("Enter z coordinate: ");
+                if (!add(current_dynamic_array, &value)) {
+                    printf("Error: Failed to add element (errno: %d)\n", errno);
+                } else {
+                    printf("Element added successfully.\n");
+                }
                 break;
 
             case 3:
-                if (current_dynamicArray == NULL) {
+                if (current_dynamic_array == NULL) {
                     printf("Error: No dynamicArray created.\n");
                     break;
                 }
-                index = readInt("Enter index to get element: ");
-                if (index >= 0 && index < current_dynamicArray->size) {
-                    Point *element = (Point *)get(current_dynamicArray, index);
+                index = read_int("Enter index to get element: ");
+                if (index >= 0 && index < (int)current_dynamic_array->size) {
+                    Point *element = (Point *)get(current_dynamic_array, index);
                     if (element != NULL) {
-                        printf("Element at index %d: (%.2f, %.2f, %.2f)\n", index, element->x, element->y, element->z);
+                        printf("Element at index %d: (%.2f, %.2f, %.2f)\n",
+                               index, element->x, element->y, element->z);
                     } else {
-                        printf("Error getting element.\n");
+                        printf("Error getting element (errno: %d)\n", errno);
                     }
                 } else {
-                    printf("Invalid index. Please enter a number between 0 and %d.\n", current_dynamicArray->size - 1);
+                    printf("Invalid index. Please enter a number between 0 and %zu.\n",
+                           current_dynamic_array->size - 1);
                 }
                 break;
 
             case 4:
-                if (current_dynamicArray == NULL) {
+                if (current_dynamic_array == NULL) {
                     printf("Error: No dynamicArray created.\n");
                     break;
                 }
-                sort(current_dynamicArray);
-                printf("DynamicArray sorted successfully.\n");
+                if (!sort(current_dynamic_array)) {
+                    printf("Error: Failed to sort dynamicArray (errno: %d)\n", errno);
+                } else {
+                    printf("DynamicArray sorted successfully.\n");
+                }
                 break;
 
             case 5:
-                if (current_dynamicArray == NULL) {
+                if (current_dynamic_array == NULL) {
                     printf("Error: No dynamicArray created.\n");
                     break;
                 }
                 {
-                    DynamicArray *temp = concat(current_dynamicArray, current_dynamicArray);
+                    DynamicArray *temp = concat(current_dynamic_array, current_dynamic_array);
                     if (temp != NULL) {
-                        deleteDynamicArray(current_dynamicArray);
-                        current_dynamicArray = temp;
+                        if (!destroy_dynamic_array(current_dynamic_array)) {
+                            fprintf(stderr, "Warning: Failed to destroy old array (errno: %d)\n", errno);
+                        }
+                        current_dynamic_array = temp;
                         printf("DynamicArray concatenated with itself successfully.\n");
                     } else {
-                        printf("Error concatenating dynamicArrays.\n");
+                        printf("Error concatenating dynamicArrays (errno: %d)\n", errno);
                     }
                 }
                 break;
 
             case 6:
-                if (current_dynamicArray == NULL) {
+                if (current_dynamic_array == NULL) {
                     printf("Error: No dynamicArray created.\n");
                     break;
                 }
                 printf("Applying where filter (points with positive coordinates only)\n");
-                where(current_dynamicArray, positivePointFilterFunction);
+                {
+                    DynamicArray *filtered = where(current_dynamic_array, positive_point_filter_function);
+                    if (filtered != NULL) {
+                        if (!destroy_dynamic_array(current_dynamic_array)) {
+                            fprintf(stderr, "Warning: Failed to destroy old array (errno: %d)\n", errno);
+                        }
+                        current_dynamic_array = filtered;
+                        printf("Where filter applied successfully.\n");
+                    } else {
+                        printf("Error applying where filter (errno: %d)\n", errno);
+                    }
+                }
                 break;
 
             case 7:
-                if (current_dynamicArray == NULL) {
+                if (current_dynamic_array == NULL) {
                     printf("Error: No dynamicArray created.\n");
                     break;
                 }
                 printf("Applying map (incrementing coordinates by 1)\n");
-                map(current_dynamicArray, incrementPointFunction);
+                {
+                    DynamicArray *mapped = map(current_dynamic_array, increment_point_function);
+                    if (mapped != NULL) {
+                        if (!destroy_dynamic_array(current_dynamic_array)) {
+                            fprintf(stderr, "Warning: Failed to destroy old array (errno: %d)\n", errno);
+                        }
+                        current_dynamic_array = mapped;
+                        printf("Map applied successfully.\n");
+                    } else {
+                        printf("Error applying map (errno: %d)\n", errno);
+                    }
+                }
                 break;
 
             case 8:
-                if (current_dynamicArray == NULL) {
-                    printf("Error: No dynamicArray created.\n");
-                    break;
-                }
-                printf("DynamicArray elements: ");
-                for (int i = 0; i < current_dynamicArray->size; i++) {
-                    Point *element = (Point *)get(current_dynamicArray, i);
-                    if (element != NULL) {
-                        printf("(%.2f, %.2f, %.2f) ", element->x, element->y, element->z);
-                    }
-                }
-                printf("\n");
+                print_point_array();
                 break;
 
             case 9:
-                clearDynamicArray();
-                current_dynamicArray = NULL;
+                clear_dynamic_array();
                 printf("DynamicArray and all elements deleted.\n");
                 break;
 
             case 0:
-                if (current_dynamicArray != NULL) {
-                    clearDynamicArray();
-                }
+                clear_dynamic_array();
                 printf("Exiting point UI...\n");
                 return;
 
@@ -366,12 +490,12 @@ void pointUI() {
     }
 }
 
-void stringUI() {
+void string_ui(void) {
     int choice = 0;
     char buffer[256];
     int index;
 
-    while(1) {
+    while (1) {
         printf("\n=== String DynamicArray Menu ===\n");
         printf("1. Create dynamicArray\n");
         printf("2. Add element\n");
@@ -384,111 +508,141 @@ void stringUI() {
         printf("9. Delete dynamicArray and all elements\n");
         printf("0. Exit\n");
 
-        choice = readInt("Enter your choice: ");
+        choice = read_int("Enter your choice: ");
 
-        switch(choice) {
+        switch (choice) {
             case 1:
-                if (current_dynamicArray != NULL) {
+                if (current_dynamic_array != NULL) {
                     printf("Warning: Current dynamicArray will be deleted. ");
-                    clearDynamicArray();
+                    clear_dynamic_array();
                 }
-                current_dynamicArray = createEmptyDynamicArray(getStringFieldInfo());
-                printf("String dynamicArray created successfully.\n");
+                current_dynamic_array = create_empty_dynamic_array(get_string_field_info());
+                if (current_dynamic_array == NULL) {
+                    printf("Error: Failed to create dynamicArray (errno: %d)\n", errno);
+                } else {
+                    printf("String dynamicArray created successfully.\n");
+                }
                 break;
 
             case 2:
-                if (current_dynamicArray == NULL) {
+                if (current_dynamic_array == NULL) {
                     printf("Error: No dynamicArray created. Create a dynamicArray first.\n");
                     break;
                 }
                 printf("Enter string to add: ");
-                fgets(buffer, sizeof(buffer), stdin);
+                if (fgets(buffer, sizeof(buffer), stdin) == NULL) {
+                    printf("Error reading input.\n");
+                    break;
+                }
                 buffer[strcspn(buffer, "\n")] = 0;
-                add(current_dynamicArray, buffer);
-                printf("Element added successfully.\n");
+                if (!add(current_dynamic_array, buffer)) {
+                    printf("Error: Failed to add element (errno: %d)\n", errno);
+                } else {
+                    printf("Element added successfully.\n");
+                }
                 break;
 
             case 3:
-                if (current_dynamicArray == NULL) {
+                if (current_dynamic_array == NULL) {
                     printf("Error: No dynamicArray created.\n");
                     break;
                 }
-                index = readInt("Enter index to get element: ");
-                if (index >= 0 && index < current_dynamicArray->size) {
-                    char *element = (char *)get(current_dynamicArray, index);
+                index = read_int("Enter index to get element: ");
+                if (index >= 0 && index < (int)current_dynamic_array->size) {
+                    char *element = (char *)get(current_dynamic_array, index);
                     if (element != NULL) {
                         printf("Element at index %d: %s\n", index, element);
                     } else {
-                        printf("Error getting element.\n");
+                        printf("Error getting element (errno: %d)\n", errno);
                     }
                 } else {
-                    printf("Invalid index. Please enter a number between 0 and %d.\n", current_dynamicArray->size - 1);
+                    printf("Invalid index. Please enter a number between 0 and %zu.\n",
+                           current_dynamic_array->size - 1);
                 }
                 break;
 
             case 4:
-                if (current_dynamicArray == NULL) {
+                if (current_dynamic_array == NULL) {
                     printf("Error: No dynamicArray created.\n");
                     break;
                 }
-                sort(current_dynamicArray);
-                printf("DynamicArray sorted successfully.\n");
+                if (!sort(current_dynamic_array)) {
+                    printf("Error: Failed to sort dynamicArray (errno: %d)\n", errno);
+                } else {
+                    printf("DynamicArray sorted successfully.\n");
+                }
                 break;
 
             case 5:
-                if (current_dynamicArray == NULL) {
+                if (current_dynamic_array == NULL) {
                     printf("Error: No dynamicArray created.\n");
                     break;
                 }
                 {
-                    DynamicArray *temp = concat(current_dynamicArray, current_dynamicArray);
-                    deleteDynamicArray(current_dynamicArray);
-                    current_dynamicArray = temp;
-                    printf("DynamicArray concatenated with itself successfully.\n");
+                    DynamicArray *temp = concat(current_dynamic_array, current_dynamic_array);
+                    if (temp != NULL) {
+                        if (!destroy_dynamic_array(current_dynamic_array)) {
+                            fprintf(stderr, "Warning: Failed to destroy old array (errno: %d)\n", errno);
+                        }
+                        current_dynamic_array = temp;
+                        printf("DynamicArray concatenated with itself successfully.\n");
+                    } else {
+                        printf("Error concatenating dynamicArrays (errno: %d)\n", errno);
+                    }
                 }
                 break;
 
             case 6:
-                if (current_dynamicArray == NULL) {
+                if (current_dynamic_array == NULL) {
                     printf("Error: No dynamicArray created.\n");
                     break;
                 }
                 printf("Applying where filter (strings longer than 3 chars)\n");
-                where(current_dynamicArray, stringLengthFilterFunction);
+                {
+                    DynamicArray *filtered = where(current_dynamic_array, string_length_filter_function);
+                    if (filtered != NULL) {
+                        if (!destroy_dynamic_array(current_dynamic_array)) {
+                            fprintf(stderr, "Warning: Failed to destroy old array (errno: %d)\n", errno);
+                        }
+                        current_dynamic_array = filtered;
+                        printf("Where filter applied successfully.\n");
+                    } else {
+                        printf("Error applying where filter (errno: %d)\n", errno);
+                    }
+                }
                 break;
 
             case 7:
-                if (current_dynamicArray == NULL) {
+                if (current_dynamic_array == NULL) {
                     printf("Error: No dynamicArray created.\n");
                     break;
                 }
                 printf("Applying map (converting to uppercase)\n");
-                map(current_dynamicArray, toUppercaseFunction);
+                {
+                    DynamicArray *mapped = map(current_dynamic_array, to_uppercase_function);
+                    if (mapped != NULL) {
+                        if (!destroy_dynamic_array(current_dynamic_array)) {
+                            fprintf(stderr, "Warning: Failed to destroy old array (errno: %d)\n", errno);
+                        }
+                        current_dynamic_array = mapped;
+                        printf("Map applied successfully.\n");
+                    } else {
+                        printf("Error applying map (errno: %d)\n", errno);
+                    }
+                }
                 break;
 
             case 8:
-                if (current_dynamicArray == NULL) {
-                    printf("Error: No dynamicArray created.\n");
-                    break;
-                }
-                printf("DynamicArray elements: [");
-                for (int i = 0; i < current_dynamicArray->size; i++) {
-                    char *element = (char *)get(current_dynamicArray, i);
-                    if (element != NULL) {
-                        printf("\"%s\"", element);
-                        if (i < current_dynamicArray->size - 1) printf(", ");
-                    }
-                }
-                printf("]\n");
+                print_string_array();
                 break;
 
             case 9:
-                clearDynamicArray();
-                current_dynamicArray = NULL;
+                clear_dynamic_array();
                 printf("DynamicArray and all elements deleted.\n");
                 break;
 
             case 0:
+                clear_dynamic_array();
                 printf("Exiting string UI...\n");
                 return;
 

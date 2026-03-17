@@ -18,7 +18,7 @@ void test_createDynamicArray_with_data_capacity() {
     assert(dynamicArray->size == 0 && "createDynamicArray should initialize size to 0");
     assert(dynamicArray->field_info == stringFieldInfo && "createDynamicArray should set correct field info");
 
-    deleteDynamicArray(dynamicArray);
+    destroyDynamicArray(dynamicArray);
     printf("PASS: createDynamicArray with data_capacity\n");
 }
 void test_createEmptyDynamicArray() {
@@ -32,7 +32,7 @@ void test_createEmptyDynamicArray() {
     assert(dynamicArray->size == 0 && "createEmptyDynamicArray should initialize size to 0");
     assert(dynamicArray->field_info == stringFieldInfo && "createEmptyDynamicArray should set correct field info");
 
-    deleteDynamicArray(dynamicArray);
+    destroyDynamicArray(dynamicArray);
     printf("PASS: createEmptyDynamicArray\n");
 }
 void test_add_and_get() {
@@ -54,7 +54,7 @@ void test_add_and_get() {
     assert(strcmp((char*)get(dynamicArray, 1), "World") == 0 && "Second element should be 'World'");
     assert(strcmp((char*)get(dynamicArray, 2), "Test") == 0 && "Third element should be 'Test'");
 
-    deleteDynamicArray(dynamicArray);
+    destroyDynamicArray(dynamicArray);
     printf("PASS: add and get\n");
 }
 void test_get_out_of_bounds() {
@@ -67,7 +67,7 @@ void test_get_out_of_bounds() {
     assert(get(dynamicArray, -1) == NULL && "get should return NULL for negative index");
     assert(get(dynamicArray, 1) == NULL && "get should return NULL for out of bounds index");
 
-    deleteDynamicArray(dynamicArray);
+    destroyDynamicArray(dynamicArray);
     printf("PASS: get out of bounds\n");
 }
 static void toUppercaseFunction(void *element) {
@@ -106,7 +106,7 @@ void test_map() {
     assert(strcmp((char*)get(dynamicArray, 0), "HELLO") == 0 && "After map: First element should be 'HELLO'");
     assert(strcmp((char*)get(dynamicArray, 1), "WORLD") == 0 && "After map: Second element should be 'WORLD'");
 
-    deleteDynamicArray(dynamicArray);
+    destroyDynamicArray(dynamicArray);
     printf("PASS: map\n");
 }
 bool startsWithT(const void *element) {
@@ -137,7 +137,7 @@ void test_where() {
     assert(strcmp((char*)get(dynamicArray, 0), "Test") == 0 && "After where: First element should be 'Test'");
     assert(strcmp((char*)get(dynamicArray, 1), "Today") == 0 && "After where: Second element should be 'Today'");
 
-    deleteDynamicArray(dynamicArray);
+    destroyDynamicArray(dynamicArray);
     printf("PASS: where\n");
 }
 void test_concat() {
@@ -167,9 +167,9 @@ void test_concat() {
     assert(strcmp((char*)get(concatenated, 2), "Test") == 0 && "Third element of concatenated dynamicArray should be 'Test'");
     assert(strcmp((char*)get(concatenated, 3), "Concat") == 0 && "Fourth element of concatenated dynamicArray should be 'Concat'");
 
-    deleteDynamicArray(dynamicArray1);
-    deleteDynamicArray(dynamicArray2);
-    deleteDynamicArray(concatenated);
+    destroyDynamicArray(dynamicArray1);
+    destroyDynamicArray(dynamicArray2);
+    destroyDynamicArray(concatenated);
     printf("PASS: concat\n");
 }
 void test_sort() {
@@ -194,7 +194,7 @@ void test_sort() {
     assert(strcmp((char*)get(dynamicArray, 1), "banana") == 0 && "After sort: Second element should be 'banana'");
     assert(strcmp((char*)get(dynamicArray, 2), "zebra") == 0 && "After sort: Third element should be 'zebra'");
 
-    deleteDynamicArray(dynamicArray);
+    destroyDynamicArray(dynamicArray);
     printf("PASS: sort\n");
 }
 void test_deleteDynamicArray() {
@@ -211,7 +211,7 @@ void test_deleteDynamicArray() {
 
     assert(dynamicArray->size == 2 && "Size should be 2 before deletion");
 
-    deleteDynamicArray(dynamicArray);
+    destroyDynamicArray(dynamicArray);
 
     printf("PASS: deleteDynamicArray\n");
 }
@@ -231,7 +231,7 @@ void test_edge_cases() {
     DynamicArray *dynamicArrayFromNullField = createEmptyDynamicArray(NULL);
     assert(dynamicArrayFromNullField == NULL && "createEmptyDynamicArray with NULL field_info should return NULL");
 
-    deleteDynamicArray(dynamicArray);
+    destroyDynamicArray(dynamicArray);
     printf("PASS: edge cases\n");
 }
 void test_data_capacity_extension() {
@@ -275,7 +275,7 @@ void test_data_capacity_extension() {
     assert(strcmp((char*)get(dynamicArray, 3), "Fourth") == 0 && "Fourth element should be 'Fourth'");
     assert(strcmp((char*)get(dynamicArray, 4), "Fifth") == 0 && "Fifth element should be 'Fifth'");
 
-    deleteDynamicArray(dynamicArray);
+    destroyDynamicArray(dynamicArray);
     printf("PASS: data_capacity extension\n");
 }
 void test_double_operations() {
@@ -322,7 +322,7 @@ void test_double_operations() {
     assert(fabs(*sortedVal3 - 3.14) < 1e-9 && "Fourth sorted element should be 5.0");
     assert(fabs(*sortedVal4 - 5) < 1e-9 && "Fifth sorted element should be 9.99");
 
-    deleteDynamicArray(dynamicArray);
+    destroyDynamicArray(dynamicArray);
     printf("PASS: double operations\n");
 }
 void test_empty_dynamicArray_operations() {
@@ -339,7 +339,7 @@ void test_empty_dynamicArray_operations() {
 
     sort(emptyDynamicArray);
 
-    deleteDynamicArray(emptyDynamicArray);
+    destroyDynamicArray(emptyDynamicArray);
     printf("PASS: empty dynamicArray operations\n");
 }
 void test_index_boundary_conditions() {
@@ -361,7 +361,7 @@ void test_index_boundary_conditions() {
     assert(get(dynamicArray, 2) == NULL && "Index equal to size should return NULL");
     assert(get(dynamicArray, 100) == NULL && "Large out-of-bounds index should return NULL");
 
-    deleteDynamicArray(dynamicArray);
+    destroyDynamicArray(dynamicArray);
     printf("PASS: index boundary conditions\n");
 }
 void test_concat_scenarios() {
@@ -391,7 +391,7 @@ void test_concat_scenarios() {
     assert(strcmp((char*)get(concatenated, 2), "C") == 0 && "Third element should be 'C'");
     assert(strcmp((char*)get(concatenated, 3), "D") == 0 && "Fourth element should be 'D'");
 
-    deleteDynamicArray(concatenated);
+    destroyDynamicArray(concatenated);
 
     DynamicArray *emptyDynamicArray = createEmptyDynamicArray(stringFieldInfo);
     DynamicArray *concatWithEmpty = concat(dynamicArray1, emptyDynamicArray);
@@ -400,7 +400,7 @@ void test_concat_scenarios() {
     assert(strcmp((char*)get(concatWithEmpty, 0), "A") == 0 && "First element should be 'A'");
     assert(strcmp((char*)get(concatWithEmpty, 1), "B") == 0 && "Second element should be 'B'");
 
-    deleteDynamicArray(concatWithEmpty);
+    destroyDynamicArray(concatWithEmpty);
 
     DynamicArray *emptyWithConcat = concat(emptyDynamicArray, dynamicArray1);
     assert(emptyWithConcat != NULL && "Concatenation of empty with non-empty should succeed");
@@ -408,10 +408,10 @@ void test_concat_scenarios() {
     assert(strcmp((char*)get(emptyWithConcat, 0), "A") == 0 && "First element should be 'A'");
     assert(strcmp((char*)get(emptyWithConcat, 1), "B") == 0 && "Second element should be 'B'");
 
-    deleteDynamicArray(emptyWithConcat);
-    deleteDynamicArray(dynamicArray1);
-    deleteDynamicArray(dynamicArray2);
-    deleteDynamicArray(emptyDynamicArray);
+    destroyDynamicArray(emptyWithConcat);
+    destroyDynamicArray(dynamicArray1);
+    destroyDynamicArray(dynamicArray2);
+    destroyDynamicArray(emptyDynamicArray);
 
     printf("PASS: concatenation scenarios\n");
 }
@@ -437,7 +437,7 @@ void test_string_operations() {
     assert(strcmp((char*)get(dynamicArray, 2), "Special!@#$%^&*()") == 0 && "Third element should be special chars");
     assert(strcmp((char*)get(dynamicArray, 3), "\n\t\r") == 0 && "Fourth element should be escape chars");
 
-    deleteDynamicArray(dynamicArray);
+    destroyDynamicArray(dynamicArray);
     printf("PASS: string operations with special characters\n");
 }
 int main() {

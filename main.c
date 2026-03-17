@@ -2,6 +2,6 @@
 //26 вариант
 
 int main(void) {
-    doubleUI();
+    double_ui();
 }
 

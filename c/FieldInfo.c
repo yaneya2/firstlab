@@ -9,12 +9,12 @@
 
 #define STRING_SIZE 50
 
-static FieldInfo *DOUBLE_FIELD_INFO = NULL;
-static FieldInfo *STRING_FIELD_INFO = NULL;
-static FieldInfo *POINT_FIELD_INFO = NULL;
+static FieldInfo *double_field_info = NULL;
+static FieldInfo *string_field_info = NULL;
+static FieldInfo *point_field_info = NULL;
 
 
-static int doubleCompare(const void *a, const void *b) {
+static int double_compare(const void *a, const void *b) {
     double *double_a = (double *) a;
     double *double_b = (double *) b;
 
@@ -24,14 +24,14 @@ static int doubleCompare(const void *a, const void *b) {
     return 0;
 }
 
-static int stringCompare(const void *a, const void *b) {
+static int string_compare(const void *a, const void *b) {
     char *string_a = (char *) a;
     char *string_b = (char *) b;
 
     return strcmp(string_a, string_b);
 }
 
-static int PointCompare(const void *a, const void *b) {
+static int point_compare(const void *a, const void *b) {
     Point *point_a = (Point *) a;
     Point *point_b = (Point *) b;
 
@@ -45,7 +45,7 @@ static int PointCompare(const void *a, const void *b) {
 }
 
 
-static bool doubleAllocate(void *ptr) {
+static bool double_allocate(void *ptr) {
     if (ptr == NULL) {
         errno = EINVAL;
         return false;
@@ -54,7 +54,7 @@ static bool doubleAllocate(void *ptr) {
     return true;
 }
 
-static bool stringAllocate(void *ptr) {
+static bool string_allocate(void *ptr) {
     if (ptr == NULL) {
         errno = EINVAL;
         return false;
@@ -63,35 +63,7 @@ static bool stringAllocate(void *ptr) {
     return true;
 }
 
-static bool pointAllocate(void *ptr) {
-    if (ptr == NULL) {
-        errno = EINVAL;
-        return false;
-    }
-
-    return true;
-}
-
-
-static bool stringDeallocate(void *ptr) {
-    if (ptr == NULL) {
-        errno = EINVAL;
-        return false;
-    }
-
-    return true;
-}
-
-static bool doubleDeallocate(void *ptr) {
-    if (ptr == NULL) {
-        errno = EINVAL;
-        return false;
-    }
-
-    return true;
-}
-
-static bool pointDeallocate(void *ptr) {
+static bool point_allocate(void *ptr) {
     if (ptr == NULL) {
         errno = EINVAL;
         return false;
@@ -101,7 +73,35 @@ static bool pointDeallocate(void *ptr) {
 }
 
 
-static bool doubleAssign(void *res, const void *arg) {
+static bool string_deallocate(void *ptr) {
+    if (ptr == NULL) {
+        errno = EINVAL;
+        return false;
+    }
+
+    return true;
+}
+
+static bool double_deallocate(void *ptr) {
+    if (ptr == NULL) {
+        errno = EINVAL;
+        return false;
+    }
+
+    return true;
+}
+
+static bool point_deallocate(void *ptr) {
+    if (ptr == NULL) {
+        errno = EINVAL;
+        return false;
+    }
+
+    return true;
+}
+
+
+static bool double_assign(void *res, const void *arg) {
     if (res == NULL || arg == NULL) {
         errno = EINVAL;
         return false;
@@ -114,7 +114,7 @@ static bool doubleAssign(void *res, const void *arg) {
     return true;
 }
 
-static bool stringAssign(void *res, const void *arg) {
+static bool string_assign(void *res, const void *arg) {
     if (res == NULL || arg == NULL) {
         errno = EINVAL;
         return false;
@@ -134,7 +134,7 @@ static bool stringAssign(void *res, const void *arg) {
     return true;
 }
 
-static bool pointAssign(void *res, const void *arg) {
+static bool point_assign(void *res, const void *arg) {
     if (res == NULL || arg == NULL) {
         errno = EINVAL;
         return false;
@@ -148,62 +148,62 @@ static bool pointAssign(void *res, const void *arg) {
 }
 
 
-const FieldInfo *getDoubleFieldInfo() {
-    if (DOUBLE_FIELD_INFO == NULL) {
-        DOUBLE_FIELD_INFO = (FieldInfo *) malloc(sizeof(FieldInfo));
+const FieldInfo *get_double_field_info() {
+    if (double_field_info == NULL) {
+        double_field_info = (FieldInfo *) malloc(sizeof(FieldInfo));
 
-        if (DOUBLE_FIELD_INFO == NULL) {
+        if (double_field_info == NULL) {
             errno = ENOMEM;
             return NULL;
         }
 
-        DOUBLE_FIELD_INFO->size = sizeof(double);
-        DOUBLE_FIELD_INFO->name = "double";
-        DOUBLE_FIELD_INFO->compare = doubleCompare;
-        DOUBLE_FIELD_INFO->allocate = doubleAllocate;
-        DOUBLE_FIELD_INFO->deallocate = doubleDeallocate;
-        DOUBLE_FIELD_INFO->assign = doubleAssign;
+        double_field_info->size = sizeof(double);
+        double_field_info->name = "double";
+        double_field_info->compare = double_compare;
+        double_field_info->allocate = double_allocate;
+        double_field_info->deallocate = double_deallocate;
+        double_field_info->assign = double_assign;
     }
 
-    return DOUBLE_FIELD_INFO;
+    return double_field_info;
 }
 
-const FieldInfo *getStringFieldInfo() {
-    if (STRING_FIELD_INFO == NULL) {
-        STRING_FIELD_INFO = (FieldInfo *) malloc(sizeof(FieldInfo));
+const FieldInfo *get_string_field_info() {
+    if (string_field_info == NULL) {
+        string_field_info = (FieldInfo *) malloc(sizeof(FieldInfo));
 
-        if (STRING_FIELD_INFO == NULL) {
+        if (string_field_info == NULL) {
             errno = ENOMEM;
             return NULL;
         }
 
-        STRING_FIELD_INFO->size = STRING_SIZE;
-        STRING_FIELD_INFO->name = "string";
-        STRING_FIELD_INFO->compare = stringCompare;
-        STRING_FIELD_INFO->allocate = stringAllocate;
-        STRING_FIELD_INFO->deallocate = stringDeallocate;
-        STRING_FIELD_INFO->assign = stringAssign;
+        string_field_info->size = STRING_SIZE;
+        string_field_info->name = "string";
+        string_field_info->compare = string_compare;
+        string_field_info->allocate = string_allocate;
+        string_field_info->deallocate = string_deallocate;
+        string_field_info->assign = string_assign;
     }
 
-    return STRING_FIELD_INFO;
+    return string_field_info;
 }
 
-const FieldInfo *getPointFieldInfo() {
-    if (POINT_FIELD_INFO == NULL) {
-        POINT_FIELD_INFO = (FieldInfo *) malloc(sizeof(FieldInfo));
+const FieldInfo *get_point_field_info() {
+    if (point_field_info == NULL) {
+        point_field_info = (FieldInfo *) malloc(sizeof(FieldInfo));
 
-        if (POINT_FIELD_INFO == NULL) {
+        if (point_field_info == NULL) {
             errno = ENOMEM;
             return NULL;
         }
 
-        POINT_FIELD_INFO->size = sizeof(Point);
-        POINT_FIELD_INFO->name = "point";
-        POINT_FIELD_INFO->compare = PointCompare;
-        POINT_FIELD_INFO->allocate = pointAllocate;
-        POINT_FIELD_INFO->deallocate = pointDeallocate;
-        POINT_FIELD_INFO->assign = pointAssign;
+        point_field_info->size = sizeof(Point);
+        point_field_info->name = "point";
+        point_field_info->compare = point_compare;
+        point_field_info->allocate = point_allocate;
+        point_field_info->deallocate = point_deallocate;
+        point_field_info->assign = point_assign;
     }
 
-    return POINT_FIELD_INFO;
+    return point_field_info;
 }

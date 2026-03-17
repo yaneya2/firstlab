@@ -7,154 +7,170 @@
 #define START_DATA_CAPACITY 10
 #define GROW_FACTOR 2
 
-
-DynamicArray *createDynamicArray(const int data_capacity, const FieldInfo *field_info) {
+DynamicArray *create_dynamic_array(int data_capacity, const FieldInfo *field_info) {
     if (field_info == NULL || data_capacity <= 0) {
         errno = EINVAL;
         return NULL;
     }
 
-    DynamicArray *dynamicArray = (DynamicArray *) malloc(sizeof(DynamicArray));
-    if (dynamicArray == NULL) {
+    DynamicArray *dynamic_array = (DynamicArray *)malloc(sizeof(DynamicArray));
+    if (dynamic_array == NULL) {
         errno = ENOMEM;
         return NULL;
     }
 
-    dynamicArray->data_capacity = data_capacity;
-    dynamicArray->size = 0;
-    dynamicArray->field_info = field_info;
-    dynamicArray->data = malloc(dynamicArray->data_capacity * field_info->size);
-    if (dynamicArray->data == NULL) {
+    dynamic_array->data_capacity = data_capacity;
+    dynamic_array->size = 0;
+    dynamic_array->field_info = field_info;
+    dynamic_array->data = malloc((size_t)data_capacity * field_info->size);
+    if (dynamic_array->data == NULL) {
         errno = ENOMEM;
+        free(dynamic_array);
         return NULL;
     }
 
-    return dynamicArray;
+    return dynamic_array;
 }
 
-DynamicArray *createEmptyDynamicArray(const FieldInfo *field_info) {
+DynamicArray *create_empty_dynamic_array(const FieldInfo *field_info) {
     if (field_info == NULL) {
         errno = EINVAL;
         return NULL;
     }
 
-    DynamicArray *dynamicArray = (DynamicArray *) malloc(sizeof(DynamicArray));
-    if (dynamicArray == NULL) {
+    DynamicArray *dynamic_array = (DynamicArray *)malloc(sizeof(DynamicArray));
+    if (dynamic_array == NULL) {
         errno = ENOMEM;
         return NULL;
     }
 
-    dynamicArray->data_capacity = START_DATA_CAPACITY;
-    dynamicArray->size = 0;
-    dynamicArray->field_info = field_info;
-    dynamicArray->data = malloc(dynamicArray->data_capacity * field_info->size);
-    if (dynamicArray->data == NULL) {
+    dynamic_array->data_capacity = START_DATA_CAPACITY;
+    dynamic_array->size = 0;
+    dynamic_array->field_info = field_info;
+    dynamic_array->data = malloc((size_t)START_DATA_CAPACITY * field_info->size);
+    if (dynamic_array->data == NULL) {
         errno = ENOMEM;
+        free(dynamic_array);
         return NULL;
     }
 
-    return dynamicArray;
+    return dynamic_array;
 }
 
-
-bool add(DynamicArray *dynamicArray, const void *ell) {
-    if (dynamicArray == NULL || ell == NULL) {
+bool add(DynamicArray *dynamic_array, const void *element) {
+    if (dynamic_array == NULL || element == NULL) {
         errno = EINVAL;
         return false;
     }
 
-    if (dynamicArray->size == dynamicArray->data_capacity) {
-        void *temp_data_ptr = realloc(dynamicArray->data, GROW_FACTOR * dynamicArray->data_capacity * dynamicArray->field_info->size);
+    if (dynamic_array->size == dynamic_array->data_capacity) {
+        size_t new_capacity = (size_t)dynamic_array->data_capacity * GROW_FACTOR;
+        void *temp_data_ptr = realloc(dynamic_array->data, new_capacity * dynamic_array->field_info->size);
         if (temp_data_ptr == NULL) {
             errno = ENOMEM;
             return false;
         }
-        dynamicArray->data = temp_data_ptr;
-        dynamicArray->data_capacity *= GROW_FACTOR;
+        dynamic_array->data = temp_data_ptr;
+        dynamic_array->data_capacity = (int)new_capacity;
     }
 
-    if (!dynamicArray->field_info->allocate((unsigned char *) dynamicArray->data + dynamicArray->field_info->size * dynamicArray->size)) {
+    unsigned char *element_ptr = (unsigned char *)dynamic_array->data +
+                                  (size_t)dynamic_array->field_info->size * dynamic_array->size;
+
+    if (!dynamic_array->field_info->allocate(element_ptr)) {
         return false;
     }
 
-    if (!dynamicArray->field_info->assign((unsigned char *) dynamicArray->data + dynamicArray->field_info->size * dynamicArray->size, ell)) {
-        int temp_errno = errno;
-        dynamicArray->field_info->deallocate((unsigned char *) dynamicArray->data + dynamicArray->field_info->size * dynamicArray->size);
-        errno = temp_errno;
+    if (!dynamic_array->field_info->assign(element_ptr, element)) {
+        int saved_errno = errno;
+        dynamic_array->field_info->deallocate(element_ptr);
+        errno = saved_errno;
         return false;
     }
 
-    dynamicArray->size++;
+    dynamic_array->size++;
     return true;
 }
 
-void *get(const DynamicArray *dynamicArray, const int index) {
-    if (dynamicArray == NULL || index < 0 || index >= dynamicArray->size) {
+void *get(const DynamicArray *dynamic_array, int index) {
+    if (dynamic_array == NULL || index < 0 || index >= dynamic_array->size) {
         errno = EINVAL;
         return NULL;
     }
 
-    return (unsigned char *) dynamicArray->data + index * dynamicArray->field_info->size;
+    return (unsigned char *)dynamic_array->data + (size_t)dynamic_array->field_info->size * index;
 }
 
-bool set(DynamicArray *dynamicArray, const int index, const void *value) {
-    if (dynamicArray == NULL || index < 0 || index >= dynamicArray->size) {
+bool set(DynamicArray *dynamic_array, int index, const void *value) {
+    if (dynamic_array == NULL || index < 0 || index >= dynamic_array->size || value == NULL) {
         errno = EINVAL;
         return false;
     }
 
-    if (!dynamicArray->field_info->deallocate(get(dynamicArray, index))) {
+    void *element_ptr = get(dynamic_array, index);
+    if (element_ptr == NULL) {
         return false;
     }
 
-    if (!dynamicArray->field_info->allocate(get(dynamicArray, index))) {
+    if (!dynamic_array->field_info->deallocate(element_ptr)) {
         return false;
     }
 
-    if (!dynamicArray->field_info->assign(get(dynamicArray, index), value)) {
+    if (!dynamic_array->field_info->allocate(element_ptr)) {
+        return false;
+    }
+
+    if (!dynamic_array->field_info->assign(element_ptr, value)) {
         return false;
     }
 
     return true;
 }
 
-
-DynamicArray *map(DynamicArray *dynamicArray, void *(*function)(void *)) {
-    if (dynamicArray == NULL || function == NULL) {
+DynamicArray *map(const DynamicArray *dynamic_array, void *(*function)(void *)) {
+    if (dynamic_array == NULL || function == NULL) {
         errno = EINVAL;
         return NULL;
     }
 
-    DynamicArray *result = createEmptyDynamicArray(dynamicArray->field_info);
+    DynamicArray *result = create_empty_dynamic_array(dynamic_array->field_info);
     if (result == NULL) {
         return NULL;
     }
 
-    for (int i = 0; i < dynamicArray->size; ++i) {
-        if (!add(result, function(get(dynamicArray, i)))) {
-            destroyDynamicArray(result);
+    for (size_t i = 0; i < (size_t)dynamic_array->size; ++i) {
+        void *new_value = function(get(dynamic_array, (int)i));
+        if (new_value == NULL) {
+            destroy_dynamic_array(result);
             return NULL;
         }
+        if (!add(result, new_value)) {
+            free(new_value);
+            destroy_dynamic_array(result);
+            return NULL;
+        }
+        free(new_value);
     }
 
     return result;
 }
 
-DynamicArray *where(DynamicArray *dynamicArray, bool (*function)(const void *)) {
-    if (dynamicArray == NULL || function == NULL) {
+DynamicArray *where(const DynamicArray *dynamic_array, bool (*function)(const void *)) {
+    if (dynamic_array == NULL || function == NULL) {
         errno = EINVAL;
         return NULL;
     }
 
-    DynamicArray *result = createEmptyDynamicArray(dynamicArray->field_info);
+    DynamicArray *result = create_empty_dynamic_array(dynamic_array->field_info);
     if (result == NULL) {
         return NULL;
     }
 
-    for (int i = 0; i < dynamicArray->size; ++i) {
-        if (function(get(dynamicArray, i))) {
-            if (!add(result, get(dynamicArray, i))) {
-                destroyDynamicArray(result);
+    for (size_t i = 0; i < (size_t)dynamic_array->size; ++i) {
+        void *element = get(dynamic_array, (int)i);
+        if (element != NULL && function(element)) {
+            if (!add(result, element)) {
+                destroy_dynamic_array(result);
                 return NULL;
             }
         }
@@ -163,87 +179,94 @@ DynamicArray *where(DynamicArray *dynamicArray, bool (*function)(const void *)) 
     return result;
 }
 
-
-DynamicArray *concat(const DynamicArray *dynamicArray1, const DynamicArray *dynamicArray2) {
-    if (dynamicArray1 == NULL || dynamicArray2 == NULL) {
+DynamicArray *concat(const DynamicArray *dynamic_array1, const DynamicArray *dynamic_array2) {
+    if (dynamic_array1 == NULL || dynamic_array2 == NULL) {
         errno = EINVAL;
         return NULL;
     }
 
-    if (dynamicArray1->field_info != dynamicArray2->field_info) {
+    if (dynamic_array1->field_info != dynamic_array2->field_info) {
         errno = EINVAL;
         return NULL;
     }
 
-    DynamicArray *dynamicArray = createDynamicArray(dynamicArray1->data_capacity + dynamicArray2->data_capacity, dynamicArray1->field_info);
-    if (dynamicArray == NULL) {
+    int total_capacity = dynamic_array1->data_capacity + dynamic_array2->data_capacity;
+    DynamicArray *result = create_dynamic_array(total_capacity, dynamic_array1->field_info);
+    if (result == NULL) {
         return NULL;
     }
 
-    for (int i = 0; i < dynamicArray1->size; ++i) {
-        if (!add(dynamicArray, get(dynamicArray1, i))) {
-            destroyDynamicArray(dynamicArray);
+    for (size_t i = 0; i < (size_t)dynamic_array1->size; ++i) {
+        if (!add(result, get(dynamic_array1, (int)i))) {
+            destroy_dynamic_array(result);
             return NULL;
         }
     }
 
-    for (int i = 0; i < dynamicArray2->size; ++i) {
-        if (!add(dynamicArray, get(dynamicArray2, i))) {
-            destroyDynamicArray(dynamicArray);
+    for (size_t i = 0; i < (size_t)dynamic_array2->size; ++i) {
+        if (!add(result, get(dynamic_array2, (int)i))) {
+            destroy_dynamic_array(result);
             return NULL;
         }
     }
 
-    return dynamicArray;
+    return result;
 }
 
-
-bool sort(DynamicArray *dynamicArray) {
-    if (dynamicArray == NULL || dynamicArray->size == 0) {
+bool sort(DynamicArray *dynamic_array) {
+    if (dynamic_array == NULL || dynamic_array->size == 0) {
         errno = EINVAL;
         return false;
     }
 
-    int minIndex = 0;
-    void *t = malloc(dynamicArray->field_info->size);
-    if (t == NULL) {
+    void *temp = malloc(dynamic_array->field_info->size);
+    if (temp == NULL) {
         errno = ENOMEM;
         return false;
     }
 
-    for (int i = 0; i < dynamicArray->size - 1; i++) {
-        minIndex = i;
-        for (int j = i + 1; j < dynamicArray->size; j++) {
-            if (dynamicArray->field_info->compare(get(dynamicArray, j), get(dynamicArray, minIndex)) == -1) {
-                minIndex = j;
+    for (size_t i = 0; i < (size_t)dynamic_array->size - 1; ++i) {
+        size_t min_index = i;
+        for (size_t j = i + 1; j < (size_t)dynamic_array->size; ++j) {
+            if (dynamic_array->field_info->compare(
+                    get(dynamic_array, (int)j),
+                    get(dynamic_array, (int)min_index)) < 0) {
+                min_index = j;
             }
         }
 
-        if (!dynamicArray->field_info->assign(t, get(dynamicArray, i)) ||
-            !dynamicArray->field_info->assign(get(dynamicArray, i), get(dynamicArray, minIndex)) ||
-            !dynamicArray->field_info->assign(get(dynamicArray, minIndex), t)) {
-            free(t);
-            return false;
+        if (min_index != i) {
+            void *elem_i = get(dynamic_array, (int)i);
+            void *elem_min = get(dynamic_array, (int)min_index);
+
+            if (!dynamic_array->field_info->assign(temp, elem_i) ||
+                !dynamic_array->field_info->assign(elem_i, elem_min) ||
+                !dynamic_array->field_info->assign(elem_min, temp)) {
+                free(temp);
+                return false;
+            }
         }
     }
 
-    free(t);
+    free(temp);
     return true;
 }
 
-
-bool destroyDynamicArray(DynamicArray *dynamicArray) {
-    if (dynamicArray == NULL) {
+bool destroy_dynamic_array(DynamicArray *dynamic_array) {
+    if (dynamic_array == NULL) {
         errno = EINVAL;
         return false;
     }
 
-    for (int i = 0; i < dynamicArray->size; i++) {
-        dynamicArray->field_info->deallocate(get(dynamicArray, i));
+    if (dynamic_array->data != NULL && dynamic_array->field_info != NULL) {
+        for (int i = 0; i < dynamic_array->size; ++i) {
+            void *element_ptr = (unsigned char *)dynamic_array->data +
+                                (size_t)dynamic_array->field_info->size * i;
+            dynamic_array->field_info->deallocate(element_ptr);
+        }
+        free(dynamic_array->data);
     }
 
-    free(dynamicArray->data);
-    free(dynamicArray);
-
+    free(dynamic_array);
     return true;
 }
