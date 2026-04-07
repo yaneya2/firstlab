@@ -2,13 +2,15 @@
 #define FIRSTLAB_FIELD_INFO_H
 
 #include <stdbool.h>
+#include <stddef.h>
+
 #include "Allocator.h"
 
 typedef bool (*UnaryOperator)(void *, const void *);
 typedef int (*CompareOperator)(const void *, const void *);
 
 typedef struct {
-    int size;
+    size_t size;
     char *name;
     UnaryOperator assign;
     Allocator allocate;

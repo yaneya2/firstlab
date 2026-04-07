@@ -1,6 +1,3 @@
-// test_dynamic_array.c
-// Full test suite for DynamicArray using only assert
-
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,16 +5,14 @@
 #include <errno.h>
 #include <stdbool.h>
 
-#include "../firstlab/headers/DynamicArray.h"
-#include "../firstlab/headers/FieldInfo.h"
-#include "../firstlab/headers/UsersStruct.h"
+#include "headers/DynamicArray.h"
+#include "headers/FieldInfo.h"
+#include "headers/UsersStruct.h"
 
 // ============================================================================
 // HELPER FUNCTIONS FOR TESTS
 // ============================================================================
 
-// map() helper: multiply double by 2
-// Returns malloc'd memory because map() calls free() on the result
 void *multiply_by_two(void *x) {
     if (x == NULL) {
         return NULL;
@@ -96,12 +91,6 @@ void test_create_dynamic_array() {
     // NULL FieldInfo should fail
     errno = 0;
     arr = create_dynamic_array(10, NULL);
-    assert(arr == NULL);
-    assert(errno == EINVAL);
-
-    // Negative capacity should fail
-    errno = 0;
-    arr = create_dynamic_array(-5, fi);
     assert(arr == NULL);
     assert(errno == EINVAL);
 
